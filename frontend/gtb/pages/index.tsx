@@ -1,4 +1,5 @@
 import type { NextPage } from 'next'
+import Amplify from 'aws-amplify'
 
 const Home: NextPage = () => {
   return (
