@@ -8,8 +8,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/ramda": "^0.27.64",
     "aws-amplify": "^4.3.13",
     "next": "12.0.9",
+    "ramda": "^0.28.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-social-login-buttons": "^3.6.0"
