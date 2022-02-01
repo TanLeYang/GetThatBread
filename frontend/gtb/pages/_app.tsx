@@ -2,6 +2,7 @@ import "../styles/globals.css"
 import type { AppProps } from "next/app"
 import Amplify from "aws-amplify"
 import { amplifyConfig } from "../config/config"
+import { AuthContextProvider } from "../contexts/authContext"
 
 Amplify.configure({
   ...amplifyConfig,
@@ -9,7 +10,11 @@ Amplify.configure({
 })
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+  return ( 
+    <AuthContextProvider>
+      <Component {...pageProps} />
+    </AuthContextProvider>
+  )
 }
 
 export default MyApp

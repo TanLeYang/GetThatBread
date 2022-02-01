@@ -1,10 +1,12 @@
+import { User } from "../constants/types/user"
+
 interface AuthResult {
   isAuthenticated: boolean,
-  user: any,
+  user?: User,
 }
 
 interface AuthService {
-  currentAuthenticatedUser(): any
+  currentAuthenticatedUser({}: any): any
 }
 
 const UNAUTHORISED_REDIRECT = {
@@ -18,21 +20,33 @@ const checkAuth = async (auth: AuthService): Promise<AuthResult> => {
   try {
     const user = await getUser(auth) 
     return {
-      isAuthenticated: user !== null,
+      isAuthenticated: user !== undefined,
       user
     }
   } catch (err) {
-    console.log(`auth error: ${err}`)
     return {
       isAuthenticated: false,
-      user: null
+      user: undefined 
     }
   }
 }
 
 const getUser = async (auth: AuthService) => {
-  const user = auth.currentAuthenticatedUser()
-  return user
+  try {
+    const { attributes } = await auth.currentAuthenticatedUser({
+      bypassCache: true
+    })
+    const user = {
+      id: attributes.sub,
+      email: attributes.email,
+      username: attributes.preferred_username,
+      picture: attributes.picture
+    }
+    return user
+  } catch (err) {
+    console.error(`cannot get user: ${err}`)
+    return undefined
+  }
 }
 
 export {
