@@ -1,8 +1,7 @@
 import type { NextPage } from "next"
-import { Auth } from "aws-amplify"
-import { GithubLoginButton } from "react-social-login-buttons"
 import { useContext, useEffect } from "react"
 import AuthContext from "../contexts/authContext"
+import HeroSection from "../components/Hero"
 
 const Landing: NextPage = () => {
 
@@ -14,13 +13,15 @@ const Landing: NextPage = () => {
   }, [])
 
   return (
-    <div>
-      { user && <h1> {user.username} </h1> }
-      <GithubLoginButton
-        onClick={() => {
-          Auth.federatedSignIn({ customProvider: "Github" })
-        }}
-      />
+    <div className="bg-black h-full w-full fixed top-0 bottom-0">
+      <header>
+        <nav className="container flex items-start py-4 mt-4 sm:mt-12">
+          <h1 className="text-white">Get That Bread!</h1>
+        </nav> 
+      </header>
+      <section className="relative">
+        <HeroSection/>
+      </section>
     </div>
   )
 }
