@@ -1,9 +1,12 @@
+import Image from "next/image"
+import heroSplashImg from "../public/images/herosplash.png"
 import { GithubLoginButton } from "react-social-login-buttons"
 
 const HeroSection = () => {
   return (
     <div className="container flex flex-col-reverse lg:flex-row items-center gap-12 mt-14 lg:mt-28">
       <HeroText/>
+      <HeroImage/>
     </div>
   )
 }
@@ -21,6 +24,17 @@ const HeroText = () => {
       <div className="flex justify-center flex-wrap gap-6">
         <GithubLoginButton/>
       </div>
+    </div>
+  )
+}
+
+const HeroImage = () => {
+  return(
+    <div className="flex justify-center flex-1 mb-10 md:mb-16 lg:mb-0">
+      <Image
+        src={heroSplashImg}
+        alt="Stock coding picture"
+      />
     </div>
   )
 }
