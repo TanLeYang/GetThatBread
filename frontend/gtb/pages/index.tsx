@@ -1,8 +1,8 @@
-import type { NextPage } from 'next'
-import { Auth } from 'aws-amplify'
-import { GithubLoginButton } from 'react-social-login-buttons'
-import { useContext, useEffect } from 'react'
-import AuthContext from '../contexts/authContext'
+import type { NextPage } from "next"
+import { Auth } from "aws-amplify"
+import { GithubLoginButton } from "react-social-login-buttons"
+import { useContext, useEffect } from "react"
+import AuthContext from "../contexts/authContext"
 
 const Landing: NextPage = () => {
 
