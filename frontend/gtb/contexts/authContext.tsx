@@ -1,6 +1,6 @@
-import { Auth, withSSRContext } from "aws-amplify";
+import { Auth } from "aws-amplify";
 import { createContext, useState } from "react";
-import { getUser } from "../common/auth";
+import { getUser } from "../services/auth";
 import { User } from "../constants/types/user";
 
 type AuthContextState = {

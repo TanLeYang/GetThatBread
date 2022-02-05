@@ -1,6 +1,5 @@
-import Amplify, { Auth, withSSRContext } from "aws-amplify";
 import { GetServerSideProps, NextPage } from "next";
-import { checkAuth, getUser, UNAUTHORISED_REDIRECT } from "../common/auth";
+import { checkAuth, UNAUTHORISED_REDIRECT } from "../services/auth";
 
 const Home: NextPage = () => {
 
@@ -14,8 +13,7 @@ const Home: NextPage = () => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { Auth } = withSSRContext(context)
-  const authResult = await checkAuth(Auth)
+  const authResult = await checkAuth(context)
   if (!authResult.isAuthenticated) {
     return UNAUTHORISED_REDIRECT
   }
