@@ -16,7 +16,7 @@ const Landing: NextPage = () => {
     <div className="bg-gray-700 h-full w-full fixed top-0 bottom-0 z-50">
       <header>
         <nav className="container flex items-start py-4 mt-4 sm:mt-12">
-          <h1 className="text-white">Get That Bread!</h1>
+          <h1 className="text-white text-xl">GetThatBread 🍞</h1>
         </nav> 
       </header>
       <section className="relative">
