@@ -19,7 +19,7 @@ interface CodeService {
   joinRoom(roomCode: string): Promise<Room> 
 }
 
-export default function createRoomService(redisClient: RedisClientType): CodeService {
+export default function createCodeService(redisClient: RedisClientType): CodeService {
 
   async function joinRoom(roomCode: string): Promise<Room> {
     const subscriber = redisClient.duplicate()
