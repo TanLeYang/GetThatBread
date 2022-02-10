@@ -27,6 +27,7 @@ function createRoom(redisClient: RedisClientType, roomCode: string): Room {
 
   const publishFunction = async (codeState: CodeState) => {
     const rawMessage = JSON.stringify(codeState)
+    await redisClient.connect()
     await redisClient.publish(roomCode, rawMessage)
   }
 
@@ -42,8 +43,7 @@ export interface CodeService {
 }
 
 export default function createCodeService(redisClient: RedisClientType): CodeService {
-
-  function getRoom(roomCode: string): Room {
+  const getRoom = (roomCode: string): Room => {
     return createRoom(redisClient, roomCode)
   }
 

@@ -1,32 +1,40 @@
-import { WebSocketServer } from "ws"
+import express from "express";
 import * as redis from "redis"
-import { CODE_CHANGED, CONNECTION, JOIN_ROOM_REQ } from "./constants";
-import { createCodeChangeController, createJoinRoomController } from "./controllers";
-import createCodeService from "./coding";
+import http from "http"
+import createCodeService, { CodeState } from "./coding";
+import { CodeModifiedMessage, initializeSocketServer, SocketType } from "./socket";
+import { createCodeModifiedController, createJoinRoomController } from "./controllers";
 
+// Set up redis
 const REDIS_SERVER = "redis://localhost:6379"
-const WS_PORT = 3000;
-
 const redisClient = redis.createClient({
   url: REDIS_SERVER
 })
 export type RedisClientType = typeof redisClient
 
-// Intialize dependencies
+// Set up socketio
+const app = express()
+const server = http.createServer(app)
+const io = initializeSocketServer(server)
+const IO_PORT = 3000;
+
+// Intialize controllers and their dependencies
 const codeService = createCodeService(redisClient)
 const joinRoomController = createJoinRoomController(codeService)
-const codeChangeController = createCodeChangeController(codeService)
+const codeChangeController = createCodeModifiedController(codeService)
 
-// Initalize server
-const server = new WebSocketServer({ port: WS_PORT })
-server.on(CONNECTION, async (ws) => {
-  ws.on(JOIN_ROOM_REQ, (msg) => {
-    joinRoomController(ws, msg) 
+io.on("connection", (socket: SocketType) => {
+  socket.on("joinRoom", (msg: string) => {
+    console.log("joinRoom")
+    joinRoomController(socket, msg)
   })
 
-  ws.on(CODE_CHANGED, (msg) => {
-    codeChangeController(msg)
+  socket.on("informCodeModified", (msg: CodeModifiedMessage) => {
+    console.log(msg)
+    codeChangeController(msg) 
   })
 })
 
-console.log("WebSocket server started at ws://locahost:"+ WS_PORT);
+server.listen(IO_PORT, () => {
+  console.log(`server listening on port ${IO_PORT}`)
+})
