@@ -1,6 +1,6 @@
 import { WebSocketServer } from "ws"
 import * as redis from "redis"
-import { WS_CONNECTION, WS_JOIN_ROOM_REQ } from "./constants";
+import { CONNECTION, JOIN_ROOM_REQ } from "./constants";
 import { createJoinRoomController } from "./controllers";
 import createCodeService from "./coding";
 
@@ -18,8 +18,8 @@ const joinRoomController = createJoinRoomController(codeService)
 
 // Initalize server
 const server = new WebSocketServer({ port: WS_PORT })
-server.on(WS_CONNECTION, async (ws) => {
-  ws.on(WS_JOIN_ROOM_REQ, (msg) => {
+server.on(CONNECTION, async (ws) => {
+  ws.on(JOIN_ROOM_REQ, (msg) => {
     joinRoomController(ws, msg) 
   })
 })
