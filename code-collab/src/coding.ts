@@ -1,4 +1,4 @@
-import { RedisClientType } from "@node-redis/client/dist/lib/client"
+import { RedisClientType } from "./server"
 
 export type CodeState = {
   code: string
@@ -15,7 +15,7 @@ export type Room = {
   publish(codeState: CodeState): Promise<void>
 }
 
-interface CodeService {
+export interface CodeService {
   joinRoom(roomCode: string): Promise<Room> 
 }
 
