@@ -1,7 +1,7 @@
 import { WebSocketServer } from "ws"
 import * as redis from "redis"
-import { CONNECTION, JOIN_ROOM_REQ } from "./constants";
-import { createJoinRoomController } from "./controllers";
+import { CODE_CHANGED, CONNECTION, JOIN_ROOM_REQ } from "./constants";
+import { createCodeChangeController, createJoinRoomController } from "./controllers";
 import createCodeService from "./coding";
 
 const REDIS_SERVER = "redis://localhost:6379"
@@ -15,12 +15,17 @@ export type RedisClientType = typeof redisClient
 // Intialize dependencies
 const codeService = createCodeService(redisClient)
 const joinRoomController = createJoinRoomController(codeService)
+const codeChangeController = createCodeChangeController(codeService)
 
 // Initalize server
 const server = new WebSocketServer({ port: WS_PORT })
 server.on(CONNECTION, async (ws) => {
   ws.on(JOIN_ROOM_REQ, (msg) => {
     joinRoomController(ws, msg) 
+  })
+
+  ws.on(CODE_CHANGED, (msg) => {
+    codeChangeController(msg)
   })
 })
 
