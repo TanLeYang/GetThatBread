@@ -51,6 +51,8 @@ export default function createCodeService(redisClient: RedisClientType): CodeSer
       return subscriptions
     }
 
+    await subscriber.disconnect()
+
     const newSubscriptions = new Map(subscriptions)
     newSubscriptions.delete(subscriberID)
     return newSubscriptions
