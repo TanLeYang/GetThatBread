@@ -1,25 +1,25 @@
 import { Socket } from "socket.io"
-import { CodeService, CodeState, Room } from "./coding"
+import { CodeService, CodeState, SubscriptionState } from "./coding"
 import { CodeModifiedMessage } from "./socket"
 
 export function createJoinRoomController(codeService: CodeService) {
-  return async (ws: Socket, msg: string) => {
+  return async (ws: Socket, msg: string, subscriptions: SubscriptionState) => {
     const roomCode = msg
     ws.join(roomCode)
-    const room = codeService.getRoom(roomCode)
-    await subscribeToRoom(ws, room)
+    return codeService.subscribe(subscriptions, ws.id, roomCode, (codeState: CodeState) => {
+      ws.emit("codeModified", codeState)
+    })
   }
-}
-
-async function subscribeToRoom(ws: Socket, room: Room) {
-  await room.subscribe((codeState: CodeState) => {
-    ws.emit("codeModified", codeState)
-  })
 }
 
 export function createCodeModifiedController(codeService: CodeService) {
   return async (msg: CodeModifiedMessage) => {
-    const room = codeService.getRoom(msg.roomCode)
-    room.publish(msg.codeState)
+    return codeService.publish(msg.roomCode, msg.codeState)
+  }
+}
+
+export function createDisconnectController(codeService: CodeService) {
+  return async (ws: Socket, subscriptions: SubscriptionState) => {
+    return codeService.unsubscribe(subscriptions, ws.id)
   }
 }

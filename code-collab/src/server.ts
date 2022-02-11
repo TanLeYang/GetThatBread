@@ -1,9 +1,9 @@
 import express from "express";
 import * as redis from "redis"
 import http from "http"
-import createCodeService, { CodeState } from "./coding";
+import createCodeService, { CodeState, SubscriptionState } from "./coding";
 import { CodeModifiedMessage, initializeSocketServer, SocketType } from "./socket";
-import { createCodeModifiedController, createJoinRoomController } from "./controllers";
+import { createCodeModifiedController, createDisconnectController, createJoinRoomController } from "./controllers";
 
 // Set up redis
 const REDIS_SERVER = "redis://localhost:6379"
@@ -22,16 +22,21 @@ const IO_PORT = 3000;
 const codeService = createCodeService(redisClient)
 const joinRoomController = createJoinRoomController(codeService)
 const codeChangeController = createCodeModifiedController(codeService)
+const disconnectController = createDisconnectController(codeService)
+
+let subscriptionState: SubscriptionState = new Map<string, RedisClientType>()
 
 io.on("connection", (socket: SocketType) => {
-  socket.on("joinRoom", (msg: string) => {
-    console.log("joinRoom")
-    joinRoomController(socket, msg)
+  socket.on("joinRoom", async (msg: string) => {
+    subscriptionState = await joinRoomController(socket, msg, subscriptionState)
   })
 
-  socket.on("informCodeModified", (msg: CodeModifiedMessage) => {
-    console.log(msg)
-    codeChangeController(msg) 
+  socket.on("informCodeModified", async (msg: CodeModifiedMessage) => {
+    await codeChangeController(msg) 
+  })
+
+  socket.on("disconnect", async () => {
+    subscriptionState = await disconnectController(socket, subscriptionState)
   })
 })
 

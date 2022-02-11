@@ -9,45 +9,62 @@ export enum CodeLanguage {
   PYTHON
 }
 
-export type Room = {
-  roomCode: string
-  subscribe(callback: (codeState: CodeState) => void): Promise<void>
-  publish(codeState: CodeState): Promise<void>
+export type SubscriptionState = Map<string, RedisClientType>
+
+export interface CodeService {
+  subscribe(
+    subscriptions: SubscriptionState,
+    subscriberID: string,
+    roomCode: string,
+    callback: (codeState: CodeState) => void
+  ): Promise<SubscriptionState> 
+  unsubscribe(subscriptions: SubscriptionState, subscriberID: string): Promise<SubscriptionState>
+  publish(roomCode: string, codeState: CodeState): Promise<void>
 }
 
-function createRoom(redisClient: RedisClientType, roomCode: string): Room {
-  const subscribeFunction = async (callback: (codeState: CodeState) => void) => {
-    const subscriber = redisClient.duplicate()
-    await subscriber.connect()
-    await subscriber.subscribe(roomCode, (msg) => {
-      const codeState = JSON.parse(msg)
-      callback(codeState)
-    }) 
+export default function createCodeService(redisClient: RedisClientType): CodeService {
+
+  async function subscribe(
+    subscriptions: SubscriptionState,
+    subscriberID: string,
+    roomCode: string,
+    callback: (codeState: CodeState) => void
+  ): Promise<SubscriptionState> {
+      const subscriber = redisClient.duplicate()
+      await subscriber.connect()
+      await subscriber.subscribe(roomCode, (msg) => {
+        const codeState = JSON.parse(msg)
+        callback(codeState)
+      }) 
+
+      const newSubscriptions = new Map(subscriptions) 
+      newSubscriptions[subscriberID] = subscriber
+      return newSubscriptions 
   }
 
-  const publishFunction = async (codeState: CodeState) => {
+  async function unsubscribe(
+    subscriptions: SubscriptionState, 
+    subscriberID: string
+  ): Promise<SubscriptionState> {
+    const subscriber = subscriptions.get(subscriberID)
+    if (!subscriber) {
+      return subscriptions
+    }
+
+    const newSubscriptions = new Map(subscriptions)
+    newSubscriptions.delete(subscriberID)
+    return newSubscriptions
+  } 
+
+  async function publish(roomCode: string, codeState: CodeState): Promise<void> {
     const rawMessage = JSON.stringify(codeState)
     await redisClient.connect()
     await redisClient.publish(roomCode, rawMessage)
   }
 
   return {
-    roomCode: roomCode,
-    subscribe: subscribeFunction,
-    publish: publishFunction
-  }
-}
-
-export interface CodeService {
-  getRoom(roomCode: string): Room 
-}
-
-export default function createCodeService(redisClient: RedisClientType): CodeService {
-  const getRoom = (roomCode: string): Room => {
-    return createRoom(redisClient, roomCode)
-  }
-
-  return {
-    getRoom
+    subscribe,
+    unsubscribe,
+    publish
   }
 }
