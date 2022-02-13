@@ -40,6 +40,9 @@ io.on("connection", (socket: SocketType) => {
   })
 })
 
-server.listen(IO_PORT, () => {
-  console.log(`server listening on port ${IO_PORT}`)
-})
+redisClient.connect()
+  .then(() => {
+    server.listen(IO_PORT, () => {
+      console.log(`server listening on port ${IO_PORT}`)
+    })
+  })
