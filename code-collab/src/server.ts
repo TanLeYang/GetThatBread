@@ -1,7 +1,7 @@
 import express from "express";
 import * as redis from "redis"
 import http from "http"
-import createCodeService, { CodeState, SubscriptionState } from "./coding";
+import createCodeService, { SubscriptionState } from "./coding";
 import { CodeModifiedMessage, initializeSocketServer, SocketType } from "./socket";
 import { createCodeModifiedController, createDisconnectController, createJoinRoomController } from "./controllers";
 
