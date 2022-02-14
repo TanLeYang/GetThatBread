@@ -4,6 +4,7 @@ import http from "http"
 import createCodeService, { SubscriptionState } from "./coding";
 import { CodeModifiedMessage, initializeSocketServer, SocketType } from "./socket";
 import { createCodeModifiedController, createDisconnectController, createJoinRoomController } from "./controllers";
+import { initializeDynamoDB } from "./dynamo";
 
 // Set up redis
 const REDIS_SERVER = "redis://localhost:6379"
@@ -40,9 +41,12 @@ io.on("connection", (socket: SocketType) => {
   })
 })
 
-redisClient.connect()
-  .then(() => {
-    server.listen(IO_PORT, () => {
-      console.log(`server listening on port ${IO_PORT}`)
-    })
+Promise.all([
+  () => redisClient.connect(),
+  () => initializeDynamoDB()
+])
+.then(() => {
+  server.listen(IO_PORT, () => {
+    console.log(`server listening on port ${IO_PORT}`)
   })
+})
