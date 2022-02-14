@@ -1,5 +1,5 @@
 import { Socket } from "socket.io"
-import { CodeService, CodeState, SubscriptionState } from "./coding"
+import { CodeService, CodeState } from "./coding"
 import { CodeModifiedMessage } from "./socket"
 
 export function createJoinRoomController(codeService: CodeService) {

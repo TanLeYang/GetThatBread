@@ -1,7 +1,7 @@
 import express from "express";
 import * as redis from "redis"
 import http from "http"
-import createCodeService, { SubscriptionState } from "./coding";
+import createCodeService from "./coding";
 import { CodeModifiedMessage, initializeSocketServer, SocketType } from "./socket";
 import { createCodeModifiedController, createDisconnectController, createJoinRoomController } from "./controllers";
 import { initializeDynamoDB } from "./dynamo";
@@ -24,7 +24,6 @@ const codeService = createCodeService(redisClient)
 const joinRoomController = createJoinRoomController(codeService)
 const codeChangeController = createCodeModifiedController(codeService)
 const disconnectController = createDisconnectController(codeService)
-
 
 io.on("connection", (socket: SocketType) => {
   socket.on("joinRoom", async (msg: string) => {
