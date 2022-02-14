@@ -1,4 +1,5 @@
 import AWS from "aws-sdk"
+import { CodeLanguage } from "./coding"
 
 const AWS_REGION = "local"
 const AWS_ENDPOINT = "http://localhost:8000"
@@ -48,6 +49,7 @@ const createTable = async () => {
 export type RoomDocument = {
   roomCode: string
   content: string
+  language: CodeLanguage
 }
 
 export const getOrCreateDocument = async (roomCode: string): Promise<RoomDocument> => {
@@ -56,7 +58,7 @@ export const getOrCreateDocument = async (roomCode: string): Promise<RoomDocumen
     return result.Item as RoomDocument
   } 
 
-  await addOrUpdateDocument({ roomCode: roomCode, content: "" })
+  await addOrUpdateDocument({ roomCode: roomCode, content: "", language: "" })
   const newResult = await getDocument(roomCode) 
   return newResult.Item as RoomDocument
 }

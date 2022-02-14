@@ -4,6 +4,7 @@ import { CodeState } from "./coding";
 
 export interface ServerToClientEvents {
   codeModified: (newCodeState: CodeState) => void
+  initialState: (initialCodeState: CodeState) => void
 }
 
 export interface ClientToServerEvents {
