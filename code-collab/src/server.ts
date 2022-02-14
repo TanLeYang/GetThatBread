@@ -25,11 +25,10 @@ const joinRoomController = createJoinRoomController(codeService)
 const codeChangeController = createCodeModifiedController(codeService)
 const disconnectController = createDisconnectController(codeService)
 
-let subscriptionState: SubscriptionState = new Map<string, RedisClientType>()
 
 io.on("connection", (socket: SocketType) => {
   socket.on("joinRoom", async (msg: string) => {
-    subscriptionState = await joinRoomController(socket, msg, subscriptionState)
+    await joinRoomController(socket, msg)
   })
 
   socket.on("informCodeModified", async (msg: CodeModifiedMessage) => {
@@ -37,13 +36,13 @@ io.on("connection", (socket: SocketType) => {
   })
 
   socket.on("disconnect", async () => {
-    subscriptionState = await disconnectController(socket, subscriptionState)
+    await disconnectController(socket)
   })
 })
 
 Promise.all([
-  () => redisClient.connect(),
-  () => initializeDynamoDB()
+  redisClient.connect(),
+  initializeDynamoDB()
 ])
 .then(() => {
   server.listen(IO_PORT, () => {

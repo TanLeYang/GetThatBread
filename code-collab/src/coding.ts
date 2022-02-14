@@ -5,31 +5,29 @@ export type CodeState = {
   language: CodeLanguage
 } 
 
-export enum CodeLanguage {
-  PYTHON
-}
+export type CodeLanguage = "PYTHON" | ""
 
 export type SubscriptionState = Map<string, RedisClientType>
 
 export interface CodeService {
   subscribe(
-    subscriptions: SubscriptionState,
     subscriberID: string,
     roomCode: string,
     callback: (codeState: CodeState) => void
-  ): Promise<SubscriptionState> 
-  unsubscribe(subscriptions: SubscriptionState, subscriberID: string): Promise<SubscriptionState>
+  ): Promise<void>
+  unsubscribe(subscriberID: string): Promise<void>
   publish(roomCode: string, codeState: CodeState): Promise<void>
 }
 
 export default function createCodeService(redisClient: RedisClientType): CodeService {
 
-  async function subscribe(
-    subscriptions: SubscriptionState,
+  let subscriptions: SubscriptionState = new Map()
+
+  const subscribe = async (
     subscriberID: string,
     roomCode: string,
     callback: (codeState: CodeState) => void
-  ): Promise<SubscriptionState> {
+  ): Promise<void> => {
       const subscriber = redisClient.duplicate()
       await subscriber.connect()
       await subscriber.subscribe(roomCode, (msg) => {
@@ -37,30 +35,21 @@ export default function createCodeService(redisClient: RedisClientType): CodeSer
         callback(codeState)
       }) 
 
-      const newSubscriptions = new Map(subscriptions) 
-      newSubscriptions[subscriberID] = subscriber
-      return newSubscriptions 
+      subscriptions[subscriberID] = subscriber
   }
 
-  async function unsubscribe(
-    subscriptions: SubscriptionState, 
-    subscriberID: string
-  ): Promise<SubscriptionState> {
+  const unsubscribe = async (subscriberID: string): Promise<void> => {
     const subscriber = subscriptions.get(subscriberID)
     if (!subscriber) {
-      return subscriptions
+      return 
     }
 
+    subscriptions.delete(subscriberID)
     await subscriber.disconnect()
-
-    const newSubscriptions = new Map(subscriptions)
-    newSubscriptions.delete(subscriberID)
-    return newSubscriptions
   } 
 
-  async function publish(roomCode: string, codeState: CodeState): Promise<void> {
+  const publish = async (roomCode: string, codeState: CodeState): Promise<void> => {
     const rawMessage = JSON.stringify(codeState)
-    await redisClient.connect()
     await redisClient.publish(roomCode, rawMessage)
   }
 
