@@ -9,10 +9,16 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   joinRoom: (roomCode: string) => void
-  informCodeModified: (codeState: CodeModifiedMessage) => void 
+  informCodeModified: (codeState: CodeModifiedMessage) => void
+  saveCode: (codeState: SaveCodeMessage) => void
 }
 
 export type CodeModifiedMessage = {
+  roomCode: string
+  codeState: CodeState
+}
+
+export type SaveCodeMessage = {
   roomCode: string
   codeState: CodeState
 }

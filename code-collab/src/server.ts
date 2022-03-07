@@ -2,8 +2,8 @@ import express from "express";
 import * as redis from "redis"
 import http from "http"
 import createCodeService from "./coding";
-import { CodeModifiedMessage, initializeSocketServer, SocketType } from "./socket";
-import { createCodeModifiedController, createDisconnectController, createJoinRoomController } from "./controllers";
+import { CodeModifiedMessage, initializeSocketServer, SaveCodeMessage, SocketType } from "./socket";
+import { createCodeModifiedController, createDisconnectController, createJoinRoomController, createSaveCodeController } from "./controllers";
 import { initializeDynamoDB } from "./dynamo";
 
 // Set up redis
@@ -23,6 +23,7 @@ const IO_PORT = 3000;
 const codeService = createCodeService(redisClient)
 const joinRoomController = createJoinRoomController(codeService)
 const codeChangeController = createCodeModifiedController(codeService)
+const saveCodeController = createSaveCodeController()
 const disconnectController = createDisconnectController(codeService)
 
 io.on("connection", (socket: SocketType) => {
@@ -31,7 +32,11 @@ io.on("connection", (socket: SocketType) => {
   })
 
   socket.on("informCodeModified", async (msg: CodeModifiedMessage) => {
-    await codeChangeController(msg) 
+    await codeChangeController(msg)
+  })
+
+  socket.on("saveCode", async (msg: SaveCodeMessage) => {
+    await saveCodeController(msg)
   })
 
   socket.on("disconnect", async () => {

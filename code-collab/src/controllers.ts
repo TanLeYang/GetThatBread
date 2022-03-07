@@ -1,6 +1,6 @@
 import { CodeService, CodeState } from "./coding"
-import { getOrCreateDocument } from "./dynamo"
-import { CodeModifiedMessage, SocketType } from "./socket"
+import { addOrUpdateDocument, getOrCreateDocument, RoomDocument } from "./dynamo"
+import { CodeModifiedMessage, SaveCodeMessage, SocketType } from "./socket"
 
 export function createJoinRoomController(codeService: CodeService) {
   return async (ws: SocketType, msg: string) => {
@@ -10,7 +10,7 @@ export function createJoinRoomController(codeService: CodeService) {
     const roomDocument = await getOrCreateDocument(roomCode)
     const initialCodeState: CodeState = {
       code: roomDocument.content,
-      language: roomDocument.language 
+      language: roomDocument.language
     }
     ws.emit("initialState", initialCodeState)
 
@@ -23,6 +23,18 @@ export function createJoinRoomController(codeService: CodeService) {
 export function createCodeModifiedController(codeService: CodeService) {
   return async (msg: CodeModifiedMessage) => {
     return codeService.publish(msg.roomCode, msg.codeState)
+  }
+}
+
+export function createSaveCodeController() {
+  return async (msg: SaveCodeMessage) => {
+    const roomDocument: RoomDocument = {
+      roomCode: msg.roomCode,
+      content: msg.codeState.code,
+      language: msg.codeState.language
+    }
+
+    addOrUpdateDocument(roomDocument)
   }
 }
 
