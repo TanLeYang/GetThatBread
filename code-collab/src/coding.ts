@@ -3,7 +3,7 @@ import { RedisClientType } from "./server"
 export type CodeState = {
   code: string
   language: CodeLanguage
-} 
+}
 
 export type CodeLanguage = "PYTHON" | ""
 
@@ -33,7 +33,7 @@ export default function createCodeService(redisClient: RedisClientType): CodeSer
       await subscriber.subscribe(roomCode, (msg) => {
         const codeState = JSON.parse(msg)
         callback(codeState)
-      }) 
+      })
 
       subscriptions[subscriberID] = subscriber
   }
@@ -41,12 +41,12 @@ export default function createCodeService(redisClient: RedisClientType): CodeSer
   const unsubscribe = async (subscriberID: string): Promise<void> => {
     const subscriber = subscriptions.get(subscriberID)
     if (!subscriber) {
-      return 
+      return
     }
 
     subscriptions.delete(subscriberID)
     await subscriber.disconnect()
-  } 
+  }
 
   const publish = async (roomCode: string, codeState: CodeState): Promise<void> => {
     const rawMessage = JSON.stringify(codeState)

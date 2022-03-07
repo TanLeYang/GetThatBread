@@ -17,7 +17,7 @@ export type RedisClientType = typeof redisClient
 const app = express()
 const server = http.createServer(app)
 const io = initializeSocketServer(server)
-const IO_PORT = 3000;
+const IO_PORT = 5000;
 
 // Intialize controllers and their dependencies
 const codeService = createCodeService(redisClient)
@@ -27,6 +27,7 @@ const saveCodeController = createSaveCodeController()
 const disconnectController = createDisconnectController(codeService)
 
 io.on("connection", (socket: SocketType) => {
+  console.log("Client Connected!")
   socket.on("joinRoom", async (msg: string) => {
     await joinRoomController(socket, msg)
   })

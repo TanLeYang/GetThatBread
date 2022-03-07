@@ -29,6 +29,11 @@ export type SocketType = Socket<ClientToServerEvents, ServerToClientEvents>
 export function initializeSocketServer(
   server: http.Server,
 ): SocketServerType {
-  const io = new Server<ClientToServerEvents, ServerToClientEvents>(server)
+  const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
+    cors: {
+      origin: "*",
+      credentials: true
+    }
+  })
   return io
 }
