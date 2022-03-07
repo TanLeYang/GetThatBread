@@ -17,12 +17,12 @@ const Room: NextPage = () => {
   }
 
   return (
-    <>
+    <div className="container">
       <CodeEditor
         value={code}
         onChange={onCodeChange}
       />
-    </>
+    </div>
   )
 }
 

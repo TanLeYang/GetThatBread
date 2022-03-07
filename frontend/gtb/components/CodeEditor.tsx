@@ -1,6 +1,7 @@
 import AceEditor from "react-ace"
+
 import "ace-builds/src-noconflict/mode-python";
-import "ace-builds/src-noconflict/theme-monokai";
+import "ace-builds/src-noconflict/theme-twilight";
 
 interface CodeEditorProps {
   value: string,
@@ -12,7 +13,7 @@ const CodeEditor: React.FunctionComponent<CodeEditorProps> = ({ value, onChange 
     <AceEditor
       placeholder="Start Coding!"
       mode="python"
-      theme="monokai"
+      theme="twilight"
       name="blah2"
       onChange={onChange}
       fontSize={14}
