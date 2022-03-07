@@ -17,11 +17,16 @@ const Room: NextPage = () => {
   }
 
   return (
-    <div className="container">
-      <CodeEditor
-        value={code}
-        onChange={onCodeChange}
-      />
+    <div className="bg-gray-700 h-screen w-screen flex flex-col">
+      <h3 className="text-white lg:text-left m-5"> Room Code: {roomCode} </h3>
+      <div className="flex h-4/5">
+        <CodeEditor
+          value={code}
+          onChange={onCodeChange}
+        />
+
+        <h1> VIDEO SECTION HERE! </h1>
+      </div>
     </div>
   )
 }
