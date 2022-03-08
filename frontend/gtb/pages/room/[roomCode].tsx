@@ -3,12 +3,13 @@ import { useRouter } from "next/router"
 import dynamic from "next/dynamic"
 import { useState, useEffect, useCallback } from "react"
 import { io, Socket } from "socket.io-client";
-import { CodeModifiedMessage, CodeState } from "../../constants/types/coding";
-import { codeModifiedEvent, joinRoomEvent } from "../../constants/types/socket_api";
+import { CodeModifiedMessage, CodeState, SaveCodeMessage } from "../../constants/types/coding";
+import { codeModifiedEvent, informCodeModifiedEvent, initialStateEvent, joinRoomEvent, saveCodeEvent } from "../../constants/types/socket_events";
 const CodeEditor = dynamic(import("../../components/CodeEditor"), {ssr: false})
 
 const Room: NextPage = () => {
 
+  const saveCodeInterval = 5000
   const router = useRouter()
   const [roomCode, setRoomCode] = useState("")
   const [code, setCode] = useState("")
@@ -21,17 +22,42 @@ const Room: NextPage = () => {
     const roomCodeStr = getRoomCodeStr(roomCode)
     setRoomCode(roomCodeStr)
 
-    const newSocket = io("ws://localhost:5000")
+    const codingSocket = io("ws://localhost:5000")
 
-    newSocket.emit(joinRoomEvent, roomCodeStr)
+    codingSocket.emit(joinRoomEvent, roomCodeStr)
 
-    newSocket.on(codeModifiedEvent, (codeState: CodeState) => {
+    codingSocket.on(codeModifiedEvent, (codeState: CodeState) => {
       setCode(codeState.code)
     })
 
-    setSocket(newSocket)
+    codingSocket.on(initialStateEvent, (codeState: CodeState) => {
+      setCode(codeState.code)
+    })
+
+    setSocket(codingSocket)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.isReady, setSocket])
+
+  // periodically save code
+  useEffect(() => {
+    if (socket == null || roomCode == "") return
+
+    const saveCodeMessage: SaveCodeMessage = {
+      roomCode,
+      codeState: {
+        code: code,
+        language: "PYTHON"
+      }
+    }
+
+    const interval = setInterval(() => {
+      socket.emit(saveCodeEvent, saveCodeMessage)
+    }, saveCodeInterval)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [socket, code, roomCode])
 
   const onCodeChange = (newCode: string) => {
     const codeModifiedMessage: CodeModifiedMessage = {
@@ -42,7 +68,7 @@ const Room: NextPage = () => {
       }
     }
 
-    socket?.emit("informCodeModified", codeModifiedMessage)
+    socket?.emit(informCodeModifiedEvent, codeModifiedMessage)
   }
 
   return (

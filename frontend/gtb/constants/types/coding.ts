@@ -9,3 +9,8 @@ export type CodeModifiedMessage = {
   roomCode: string
   codeState: CodeState
 }
+
+export type SaveCodeMessage = {
+  roomCode: string
+  codeState: CodeState
+}

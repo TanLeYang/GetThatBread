@@ -1,0 +1,5 @@
+export const joinRoomEvent = "joinRoom"
+export const initialStateEvent = "initialState"
+export const codeModifiedEvent = "codeModified"
+export const informCodeModifiedEvent = "informCodeModified"
+export const saveCodeEvent = "saveCode"
