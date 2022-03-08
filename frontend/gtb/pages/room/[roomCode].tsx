@@ -4,35 +4,38 @@ import dynamic from "next/dynamic"
 import { useState, useEffect, useCallback } from "react"
 import { io, Socket } from "socket.io-client";
 import { CodeModifiedMessage, CodeState } from "../../constants/types/coding";
+import { codeModifiedEvent, joinRoomEvent } from "../../constants/types/socket_api";
 const CodeEditor = dynamic(import("../../components/CodeEditor"), {ssr: false})
 
 const Room: NextPage = () => {
 
   const router = useRouter()
-  const { roomCode } = router.query
-
+  const [roomCode, setRoomCode] = useState("")
   const [code, setCode] = useState("")
   const [socket, setSocket] = useState<Socket|null>(null)
 
   useEffect(() => {
+    if (!router.isReady) return
+
+    const { roomCode } = router.query
+    const roomCodeStr = getRoomCodeStr(roomCode)
+    setRoomCode(roomCodeStr)
+
     const newSocket = io("ws://localhost:5000")
 
-    newSocket.emit("joinRoom", "abc")
+    newSocket.emit(joinRoomEvent, roomCodeStr)
 
-    newSocket.on("codeModified", (codeState: CodeState) => {
-      console.log("hi!", codeState.code)
+    newSocket.on(codeModifiedEvent, (codeState: CodeState) => {
       setCode(codeState.code)
     })
 
     setSocket(newSocket)
-  }, [setSocket])
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, setSocket])
 
   const onCodeChange = (newCode: string) => {
-    console.log(newCode)
-    // setCode(newCode)
     const codeModifiedMessage: CodeModifiedMessage = {
-      roomCode: "abc",
+      roomCode: getRoomCodeStr(roomCode),
       codeState: {
         code: newCode,
         language: "PYTHON"
@@ -55,6 +58,14 @@ const Room: NextPage = () => {
       </div>
     </div>
   )
+}
+
+const getRoomCodeStr = (roomCode: string | string[] | undefined): string => {
+  if (roomCode == undefined || Array.isArray(roomCode)) {
+    return ""
+  }
+
+  return roomCode
 }
 
 export default Room
