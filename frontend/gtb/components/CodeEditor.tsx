@@ -2,6 +2,7 @@ import AceEditor from "react-ace"
 
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-twilight";
+import "ace-builds/src-noconflict/ext-language_tools"
 
 interface CodeEditorProps {
   value: string,
@@ -26,10 +27,14 @@ const CodeEditor: React.FunctionComponent<CodeEditorProps> = ({ value, onChange,
       value={value}
       setOptions={{
         showLineNumbers: true,
+        behavioursEnabled: true,
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true,
+        enableSnippets: true,
         tabSize: 2,
       }}
-      height="90%"
       wrapEnabled={true}
+      height="90%"
     />
   )
 }
