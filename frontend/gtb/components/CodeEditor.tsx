@@ -7,11 +7,9 @@ import "ace-builds/src-noconflict/ext-language_tools"
 interface CodeEditorProps {
   value: string,
   onChange: (newValue: string) => void
-  width?: string,
-  height?: string
 }
 
-const CodeEditor: React.FunctionComponent<CodeEditorProps> = ({ value, onChange, width, height }) => {
+const CodeEditor: React.FunctionComponent<CodeEditorProps> = ({ value, onChange }) => {
   return (
     <AceEditor
       className="flex-grow"
@@ -34,7 +32,7 @@ const CodeEditor: React.FunctionComponent<CodeEditorProps> = ({ value, onChange,
         tabSize: 2,
       }}
       wrapEnabled={true}
-      height="90%"
+      height="95%"
     />
   )
 }
