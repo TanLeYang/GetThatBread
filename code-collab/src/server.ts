@@ -2,9 +2,9 @@ import "dotenv/config"
 import express from "express";
 import * as redis from "redis"
 import http from "http"
-import createCodeService from "./coding";
+import createCodeService, { CodeState } from "./coding";
 import { CodeModifiedMessage, initializeSocketServer, SaveCodeMessage, SocketType } from "./socket";
-import { createCodeModifiedController, createDisconnectController, createJoinRoomController, createSaveCodeController } from "./controllers";
+import { createCodeExecutionController, createCodeModifiedController, createDisconnectController, createJoinRoomController, createSaveCodeController } from "./controllers";
 import { initializeDynamoDB } from "./dynamo";
 
 // Set up redis
@@ -18,13 +18,14 @@ export type RedisClientType = typeof redisClient
 const app = express()
 const server = http.createServer(app)
 const io = initializeSocketServer(server)
-const IO_PORT = 5000;
+const IO_PORT = 5001
 
 // Intialize controllers and their dependencies
 const codeService = createCodeService(redisClient)
 const joinRoomController = createJoinRoomController(codeService)
 const codeChangeController = createCodeModifiedController(codeService)
 const saveCodeController = createSaveCodeController()
+const codeExecutionController = createCodeExecutionController()
 const disconnectController = createDisconnectController(codeService)
 
 io.on("connection", (socket: SocketType) => {
@@ -39,6 +40,10 @@ io.on("connection", (socket: SocketType) => {
 
   socket.on("saveCode", async (msg: SaveCodeMessage) => {
     await saveCodeController(msg)
+  })
+
+  socket.on("executeCode", async (codeState: CodeState) => {
+    await codeExecutionController(socket, codeState)
   })
 
   socket.on("disconnect", async () => {

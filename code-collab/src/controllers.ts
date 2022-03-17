@@ -1,5 +1,6 @@
 import { CodeService, CodeState } from "./coding"
 import { addOrUpdateDocument, getOrCreateDocument, RoomDocument } from "./dynamo"
+import AWSLambda from "./lambda"
 import { CodeModifiedMessage, SaveCodeMessage, SocketType } from "./socket"
 
 export function createJoinRoomController(codeService: CodeService) {
@@ -35,6 +36,29 @@ export function createSaveCodeController() {
     }
 
     addOrUpdateDocument(roomDocument)
+  }
+}
+
+export function createCodeExecutionController() {
+  return async (ws: SocketType, msg: CodeState) => {
+    const lambdaParams = {
+      FunctionName: "code-exec-dev-main",
+      Payload: JSON.stringify({
+        "body": {
+          "code": msg.code
+        }
+      })
+    }
+
+    const result = await AWSLambda.invoke(lambdaParams).promise()
+    console.log(result)
+    if (result.$response.error) {
+      ws.emit("codeExecutionResult", "something went wrong, please try again")
+    }
+
+    const data = JSON.parse(result.Payload.toString())
+
+    ws.emit("codeExecutionResult", data.body)
   }
 }
 
