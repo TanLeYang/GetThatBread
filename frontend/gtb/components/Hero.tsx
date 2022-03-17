@@ -1,3 +1,4 @@
+import { Auth } from "aws-amplify"
 import Image from "next/image"
 import heroSplashImg from "../public/images/herosplash.png"
 import { GithubLoginButton } from "react-social-login-buttons"
@@ -22,7 +23,11 @@ const HeroText = () => {
         with mock interviews. Get started now!
       </p>
       <div className="flex justify-center flex-wrap gap-6">
-        <GithubLoginButton/>
+        <GithubLoginButton
+          onClick={() => {
+            Auth.federatedSignIn({ customProvider: "Github" })
+          }}
+        />
       </div>
     </div>
   )
