@@ -5,6 +5,7 @@ import { CodeState } from "./coding";
 export interface ServerToClientEvents {
   codeModified: (newCodeState: CodeState) => void
   initialState: (initialCodeState: CodeState) => void
+  codeExecutionStarted: () => void
   codeExecutionResult: (output: string) => void
 }
 
@@ -12,10 +13,15 @@ export interface ClientToServerEvents {
   joinRoom: (roomCode: string) => void
   informCodeModified: (codeState: CodeModifiedMessage) => void
   saveCode: (codeState: SaveCodeMessage) => void
-  executeCode: (codeState: CodeState) => void
+  executeCode: (codeState: CodeExecutionMessage) => void
 }
 
 export type CodeModifiedMessage = {
+  roomCode: string
+  codeState: CodeState
+}
+
+export type CodeExecutionMessage = {
   roomCode: string
   codeState: CodeState
 }

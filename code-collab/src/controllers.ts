@@ -1,7 +1,7 @@
 import { CodeService, CodeState } from "./coding"
 import { addOrUpdateDocument, getOrCreateDocument, RoomDocument } from "./dynamo"
 import AWSLambda from "./lambda"
-import { CodeModifiedMessage, SaveCodeMessage, SocketType } from "./socket"
+import { CodeExecutionMessage, CodeModifiedMessage, SaveCodeMessage, SocketType } from "./socket"
 
 export function createJoinRoomController(codeService: CodeService) {
   return async (ws: SocketType, msg: string) => {
@@ -15,15 +15,29 @@ export function createJoinRoomController(codeService: CodeService) {
     }
     ws.emit("initialState", initialCodeState)
 
-    return codeService.subscribe(ws.id, roomCode, (codeState: CodeState) => {
+    const codeChangeSubscription = codeService.subscribeCodeChangeEvent(ws.id, roomCode, (codeState: CodeState) => {
       ws.emit("codeModified", codeState)
     })
+
+    const codeExecutionSubscription = codeService.subscribeCodeExecutionEvent(ws.id, roomCode, () => {
+      ws.emit("codeExecutionStarted")
+    })
+
+    const codeExecutionResultSubscription = codeService.subscribeCodeExecuionResultEvent(ws.id, roomCode, (output: string) => {
+      ws.emit("codeExecutionResult", output)
+    })
+
+    return await Promise.all([
+      codeChangeSubscription,
+      codeExecutionSubscription,
+      codeExecutionResultSubscription
+    ])
   }
 }
 
 export function createCodeModifiedController(codeService: CodeService) {
   return async (msg: CodeModifiedMessage) => {
-    return codeService.publish(msg.roomCode, msg.codeState)
+    return codeService.publishCodeChangeEvent(msg.roomCode, msg.codeState)
   }
 }
 
@@ -39,25 +53,27 @@ export function createSaveCodeController() {
   }
 }
 
-export function createCodeExecutionController() {
-  return async (ws: SocketType, msg: CodeState) => {
+export function createCodeExecutionController(codeService: CodeService) {
+  return async (msg: CodeExecutionMessage) => {
+    codeService.publishCodeExecutionEvent(msg.roomCode)
+
     const lambdaParams = {
       FunctionName: "code-exec-dev-main",
       Payload: JSON.stringify({
         "body": {
-          "code": msg.code
+          "code": msg.codeState.code
         }
       })
     }
 
     const result = await AWSLambda.invoke(lambdaParams).promise()
     if (result.$response.error) {
-      ws.emit("codeExecutionResult", "something went wrong, please try again")
+      codeService.publishCodeExecutionResultEvent(msg.roomCode, "something went wrong, please try again")
     }
 
     const data = JSON.parse(result.Payload.toString())
     const { output } = JSON.parse(data.body)
-    ws.emit("codeExecutionResult", output)
+    codeService.publishCodeExecutionResultEvent(msg.roomCode, output)
   }
 }
 
