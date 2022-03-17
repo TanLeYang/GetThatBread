@@ -10,6 +10,11 @@ export type CodeModifiedMessage = {
   codeState: CodeState
 }
 
+export type CodeExecutionMessage = {
+  roomCode: string
+  codeState: CodeState
+}
+
 export type SaveCodeMessage = {
   roomCode: string
   codeState: CodeState

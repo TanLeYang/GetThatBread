@@ -1,10 +1,11 @@
 import { NextPage } from "next";
 import { useRouter } from "next/router"
 import dynamic from "next/dynamic"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { io, Socket } from "socket.io-client";
-import { CodeModifiedMessage, CodeState, SaveCodeMessage } from "../../constants/types/coding";
+import { CodeModifiedMessage, CodeState, SaveCodeMessage, CodeExecutionMessage } from "../../constants/types/coding";
 import { codeExecutionResultEvent, codeModifiedEvent, informCodeModifiedEvent, initialStateEvent, joinRoomEvent, saveCodeEvent } from "../../constants/types/socket_events";
+import Spinner from "../../components/Spinner";
 const CodeEditor = dynamic(import("../../components/CodeEditor"), {ssr: false})
 
 const Room: NextPage = () => {
@@ -14,7 +15,10 @@ const Room: NextPage = () => {
   const [roomCode, setRoomCode] = useState("")
   const [code, setCode] = useState("")
   const [output, setOutput] = useState("")
+  const [isLoadingOutput, setIsLoadingOutput] = useState(false)
   const [socket, setSocket] = useState<Socket|null>(null)
+
+  const latestOutput = useRef(output)
 
   useEffect(() => {
     if (!router.isReady) return
@@ -36,7 +40,11 @@ const Room: NextPage = () => {
     })
 
     codingSocket.on(codeExecutionResultEvent, (newOutput: string) => {
-      setOutput(output + "\n" + newOutput)
+      setIsLoadingOutput(false)
+      setOutput(prev => {
+        latestOutput.current = prev + "\n" + newOutput
+        return latestOutput.current
+      })
     })
 
     setSocket(codingSocket)
@@ -77,9 +85,13 @@ const Room: NextPage = () => {
   }
 
   const onCodeSubmission = () => {
-    const codeState: CodeState = {
-      code: code,
-      language: "PYTHON"
+    setIsLoadingOutput(true)
+    const codeState: CodeExecutionMessage = {
+      roomCode: getRoomCodeStr(roomCode),
+      codeState: {
+        code: code,
+        language: "PYTHON"
+      }
     }
 
     socket?.emit("executeCode", codeState)
@@ -98,7 +110,9 @@ const Room: NextPage = () => {
       </div>
       <div className="flex flex-row">
         <div className="bg-gray-500 mr-5 p-1 flex-grow max-h-24 overflow-y-auto overflow-x-hidden">
-          {output}
+          <p>
+            {output}
+          </p>
         </div>
         <div className="mr-20">
           <button
@@ -110,6 +124,8 @@ const Room: NextPage = () => {
           >
             Run
           </button>
+
+          { isLoadingOutput && <Spinner/> }
         </div>
       </div>
     </div>

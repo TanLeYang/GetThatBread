@@ -41,7 +41,7 @@ export default function createCodeService(redisClient: RedisClientType): CodeSer
 
   const codeChangeEventName = (roomCode: string) => `cc-${roomCode}`
   const codeExecutionEventName = (roomCode: string) => `ce-${roomCode}`
-  const codeExecutionResultEventName = (roomCode: string) => `cc-${roomCode}`
+  const codeExecutionResultEventName = (roomCode: string) => `cer-${roomCode}`
 
   const subscribeCodeChangeEvent = async (
     subscriberID: string,
@@ -98,15 +98,15 @@ export default function createCodeService(redisClient: RedisClientType): CodeSer
 
   const publishCodeChangeEvent = async (roomCode: string, codeState: CodeState): Promise<void> => {
     const rawMessage = JSON.stringify(codeState)
-    await redisClient.publish(`cc-${roomCode}`, rawMessage)
+    await redisClient.publish(codeChangeEventName(roomCode), rawMessage)
   }
 
   const publishCodeExecutionEvent = async (roomCode: string): Promise<void> => {
-    redisClient.publish(`ce-${roomCode}`, "")
+    await redisClient.publish(codeExecutionEventName(roomCode), "")
   }
 
   const publishCodeExecutionResultEvent = async (roomCode: string, output: string): Promise<void> => {
-    redisClient.publish(`cer-${roomCode}`, output)
+    await redisClient.publish(codeExecutionResultEventName(roomCode), output)
   }
 
   const addSubscription = (subscriberID: string, client: RedisClientType) => {
