@@ -110,7 +110,7 @@ const Room: NextPage = () => {
       </div>
       <div className="flex flex-row">
         <div className="bg-gray-500 mr-5 p-1 flex-grow max-h-24 overflow-y-auto overflow-x-hidden">
-          <p>
+          <p className="whitespace-pre-wrap">
             {output}
           </p>
         </div>
