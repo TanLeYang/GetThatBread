@@ -51,14 +51,13 @@ export function createCodeExecutionController() {
     }
 
     const result = await AWSLambda.invoke(lambdaParams).promise()
-    console.log(result)
     if (result.$response.error) {
       ws.emit("codeExecutionResult", "something went wrong, please try again")
     }
 
     const data = JSON.parse(result.Payload.toString())
-
-    ws.emit("codeExecutionResult", data.body)
+    const { output } = JSON.parse(data.body)
+    ws.emit("codeExecutionResult", output)
   }
 }
 
