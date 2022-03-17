@@ -1,0 +1,16 @@
+service: code-exec
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.8
+  profile: gtb-prod-lambda
+  region: ap-southeast-1
+
+functions:
+  main:
+    handler: handler.executeCode
+    events:
+      - httpApi:
+          path: /
+          method: put
