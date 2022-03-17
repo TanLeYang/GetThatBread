@@ -1,3 +1,4 @@
+import "dotenv/config"
 import express from "express";
 import * as redis from "redis"
 import http from "http"
@@ -7,7 +8,7 @@ import { createCodeModifiedController, createDisconnectController, createJoinRoo
 import { initializeDynamoDB } from "./dynamo";
 
 // Set up redis
-const REDIS_SERVER = "redis://localhost:6379"
+const REDIS_SERVER = process.env.REDIS_URL
 const redisClient = redis.createClient({
   url: REDIS_SERVER
 })

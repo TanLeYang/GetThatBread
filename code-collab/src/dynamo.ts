@@ -4,7 +4,7 @@ import { CodeLanguage } from "./coding"
 const AWS_REGION = "local"
 const AWS_ENDPOINT = "http://localhost:8000"
 const serviceConfiguration = {
-  region: AWS_REGION, 
+  region: AWS_REGION,
   endpoint: AWS_ENDPOINT
 }
 
@@ -56,10 +56,10 @@ export const getOrCreateDocument = async (roomCode: string): Promise<RoomDocumen
   const result = await getDocument(roomCode)
   if (result.Item) {
     return result.Item as RoomDocument
-  } 
+  }
 
   await addOrUpdateDocument({ roomCode: roomCode, content: "", language: "" })
-  const newResult = await getDocument(roomCode) 
+  const newResult = await getDocument(roomCode)
   return newResult.Item as RoomDocument
 }
 

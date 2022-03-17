@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.1073.0",
+    "dotenv": "^16.0.0",
     "express": "^4.17.2",
     "redis": "^4.0.3",
     "socket.io": "^4.4.1"
