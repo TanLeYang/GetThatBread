@@ -13,7 +13,7 @@ const io = new Server(server, {
 })
 
 io.on("connection", (socket) => {
-  socket.emit("me", socket.id)
+  socket.emit("myId", socket.id)
 
   socket.on("disconnect", () => {
     socket.broadcast.emit("callended")
