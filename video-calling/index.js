@@ -12,23 +12,47 @@ const io = new Server(server, {
   }
 })
 
-io.on("connection", (socket) => {
-  socket.emit("myId", socket.id)
+const users = {}
+const socketToRoom = {}
 
-  socket.on("disconnect", () => {
-    socket.broadcast.emit("callended")
+io.on("connection", (socket) => {
+  socket.on("joinRoom", (roomId) => {
+    if (users[roomId]) {
+      users[roomId].push(socket.id)
+    } else {
+      users[roomId] = [socket.id]
+    }
+
+    socketToRoom[socket.id] = roomId
+    const usersInRoom = users[roomId].filter(id => id !== socket.id)
+    socket.emit("allUsers", usersInRoom)
   })
 
-  socket.on("calluser", ({ userToCall, signalData, from, name }) => {
-    io.to(userToCall).emit("calluser", {
-      signal: signalData,
-      from,
-      name
+  socket.on("sendingSignal", ({ signal, callerId, recipientId }) => {
+    io.to(recipientId).emit("userJoined", {
+      signal,
+      callerId
     })
   })
 
-  socket.on("answercall", (data) => {
-    io.to(data.to).emit(callaccepted, data.signal)
+  socket.on("returningSignal", ({ signal, calledId }) => {
+    io.to(calledId).emit("receivedReturnSignal", {
+      from: socket.id,
+      signal
+    })
+  })
+
+  socket.on("disconnect", () => {
+    const roomId = socketToRoom[socket.id]
+    if (!roomId) {
+      return
+    }
+
+    const usersInRoom = users[roomId]
+    if (!usersInRoom) {
+      return
+    }
+    users[roomId] = usersInRoom.filter(id => id !== socket.id)
   })
 })
 
