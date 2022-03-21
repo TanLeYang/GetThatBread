@@ -4,8 +4,9 @@ import dynamic from "next/dynamic"
 import { useState, useEffect, useRef } from "react"
 import { io, Socket } from "socket.io-client";
 import { CodeModifiedMessage, CodeState, SaveCodeMessage, CodeExecutionMessage } from "../../constants/types/coding";
-import { codeExecutionResultEvent, codeModifiedEvent, informCodeModifiedEvent, initialStateEvent, joinRoomEvent, saveCodeEvent } from "../../constants/types/socket_events";
+import { codeExecutionResultEvent, codeModifiedEvent, informCodeModifiedEvent, initialStateEvent, joinRoomEvent, saveCodeEvent } from "../../constants/socketEvents";
 import Spinner from "../../components/Spinner";
+import { PeerState, useVideoSocket } from "../../hooks/VideoSocket";
 const CodeEditor = dynamic(import("../../components/CodeEditor"), {ssr: false})
 
 const Room: NextPage = () => {
@@ -17,6 +18,7 @@ const Room: NextPage = () => {
   const [output, setOutput] = useState("")
   const [isLoadingOutput, setIsLoadingOutput] = useState(false)
   const [socket, setSocket] = useState<Socket|null>(null)
+  const { myVideo, peers } = useVideoSocket("abc", "Ly")
 
   const latestOutput = useRef(output)
 
@@ -106,7 +108,14 @@ const Room: NextPage = () => {
           onChange={onCodeChange}
         />
 
-        <h1> VIDEO SECTION HERE! </h1>
+        <div>
+          <video className="h-20 w-20" muted autoPlay playsInline ref={myVideo}/>
+          { peers.map((peer, idx) => {
+            return (
+              <Video key={idx} peer={peer}/>
+            )
+          })}
+        </div>
       </div>
       <div className="flex flex-row">
         <div className="bg-gray-500 mr-5 p-1 flex-grow max-h-24 overflow-y-auto overflow-x-hidden">
@@ -129,6 +138,26 @@ const Room: NextPage = () => {
         </div>
       </div>
     </div>
+  )
+}
+
+interface VideoProps {
+  peer: PeerState
+}
+
+const Video: React.FunctionComponent<VideoProps> = ({ peer } ) => {
+  const ref = useRef<any>()
+
+  useEffect(() => {
+    peer.instance.on("stream", (stream: MediaStream) => {
+      if (ref.current) {
+        ref.current.srcObject = stream
+      }
+    })
+  })
+
+  return (
+    <video className="h-20 w-20" playsInline autoPlay ref={ref} />
   )
 }
 

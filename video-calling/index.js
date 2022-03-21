@@ -35,8 +35,8 @@ io.on("connection", (socket) => {
     })
   })
 
-  socket.on("returningSignal", ({ signal, calledId }) => {
-    io.to(calledId).emit("receivedReturnSignal", {
+  socket.on("returningSignal", ({ signal, callerId }) => {
+    io.to(callerId).emit("receivedReturnSignal", {
       from: socket.id,
       signal
     })
