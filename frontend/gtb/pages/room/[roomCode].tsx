@@ -1,11 +1,11 @@
 import { GetServerSideProps, NextPage } from "next";
 import dynamic from "next/dynamic"
-import { useState, useEffect, useRef } from "react"
-import { io, Socket } from "socket.io-client";
-import { CodeModifiedMessage, CodeState, SaveCodeMessage, CodeExecutionMessage } from "../../constants/types/coding";
-import { codeExecutionResultEvent, codeModifiedEvent, informCodeModifiedEvent, initialStateEvent, joinRoomEvent, saveCodeEvent } from "../../constants/socketEvents";
+import { useEffect, useRef } from "react"
+import { CodeModifiedMessage, CodeExecutionMessage } from "../../constants/types/coding";
+import { informCodeModifiedEvent } from "../../constants/socketEvents";
 import Spinner from "../../components/Spinner";
 import { PeerState, useVideoSocket } from "../../hooks/VideoSocket";
+import { useCodingSocket } from "../../hooks/CodingSocket";
 const CodeEditor = dynamic(import("../../components/CodeEditor"), {ssr: false})
 
 interface RoomProps {
@@ -14,60 +14,8 @@ interface RoomProps {
 
 const Room: NextPage<RoomProps> = ({ roomCode }) => {
 
-  const saveCodeInterval = 5000
-  const [code, setCode] = useState("")
-  const [output, setOutput] = useState("")
-  const [isLoadingOutput, setIsLoadingOutput] = useState(false)
-  const [socket, setSocket] = useState<Socket|null>(null)
-  const { myVideo, peers } = useVideoSocket("abc", "Ly")
-
-  const latestOutput = useRef(output)
-
-  useEffect(() => {
-    const codingSocket = io("ws://localhost:5001")
-
-    codingSocket.emit(joinRoomEvent, roomCode)
-
-    codingSocket.on(codeModifiedEvent, (codeState: CodeState) => {
-      setCode(codeState.code)
-    })
-
-    codingSocket.on(initialStateEvent, (codeState: CodeState) => {
-      setCode(codeState.code)
-    })
-
-    codingSocket.on(codeExecutionResultEvent, (newOutput: string) => {
-      setIsLoadingOutput(false)
-      setOutput(prev => {
-        latestOutput.current = prev + "\n" + newOutput
-        return latestOutput.current
-      })
-    })
-
-    setSocket(codingSocket)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setSocket])
-
-  // periodically save code
-  useEffect(() => {
-    if (socket == null || roomCode == "") return
-
-    const saveCodeMessage: SaveCodeMessage = {
-      roomCode,
-      codeState: {
-        code: code,
-        language: "PYTHON"
-      }
-    }
-
-    const interval = setInterval(() => {
-      socket.emit(saveCodeEvent, saveCodeMessage)
-    }, saveCodeInterval)
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [socket, code, roomCode])
+  const { code, output, isLoadingOutput, setIsLoadingOutput, codingSocketRef } = useCodingSocket(roomCode)
+  const { myVideo, peers } = useVideoSocket(roomCode, "Ly")
 
   const onCodeChange = (newCode: string) => {
     const codeModifiedMessage: CodeModifiedMessage = {
@@ -78,7 +26,7 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
       }
     }
 
-    socket?.emit(informCodeModifiedEvent, codeModifiedMessage)
+    codingSocketRef.current?.emit(informCodeModifiedEvent, codeModifiedMessage)
   }
 
   const onCodeSubmission = () => {
@@ -91,7 +39,7 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
       }
     }
 
-    socket?.emit("executeCode", codeState)
+    codingSocketRef.current?.emit("executeCode", codeState)
   }
 
   return (
