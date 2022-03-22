@@ -2,7 +2,7 @@ import { GetServerSideProps, NextPage } from "next";
 import dynamic from "next/dynamic"
 import { useEffect, useRef } from "react"
 import { CodeModifiedMessage, CodeExecutionMessage } from "../../constants/types/coding";
-import { informCodeModifiedEvent } from "../../constants/socketEvents";
+import { executeCodeEvent, informCodeModifiedEvent } from "../../constants/socketEvents";
 import Spinner from "../../components/Spinner";
 import { PeerState, useVideoSocket } from "../../hooks/VideoSocket";
 import { useCodingSocket } from "../../hooks/CodingSocket";
@@ -39,7 +39,7 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
       }
     }
 
-    codingSocketRef.current?.emit("executeCode", codeState)
+    codingSocketRef.current?.emit(executeCodeEvent, codeState)
   }
 
   return (
