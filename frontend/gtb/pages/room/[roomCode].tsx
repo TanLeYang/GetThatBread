@@ -1,5 +1,4 @@
-import { NextPage } from "next";
-import { useRouter } from "next/router"
+import { GetServerSideProps, NextPage } from "next";
 import dynamic from "next/dynamic"
 import { useState, useEffect, useRef } from "react"
 import { io, Socket } from "socket.io-client";
@@ -9,11 +8,13 @@ import Spinner from "../../components/Spinner";
 import { PeerState, useVideoSocket } from "../../hooks/VideoSocket";
 const CodeEditor = dynamic(import("../../components/CodeEditor"), {ssr: false})
 
-const Room: NextPage = () => {
+interface RoomProps {
+  roomCode: string
+}
+
+const Room: NextPage<RoomProps> = ({ roomCode }) => {
 
   const saveCodeInterval = 5000
-  const router = useRouter()
-  const [roomCode, setRoomCode] = useState("")
   const [code, setCode] = useState("")
   const [output, setOutput] = useState("")
   const [isLoadingOutput, setIsLoadingOutput] = useState(false)
@@ -23,15 +24,9 @@ const Room: NextPage = () => {
   const latestOutput = useRef(output)
 
   useEffect(() => {
-    if (!router.isReady) return
-
-    const { roomCode } = router.query
-    const roomCodeStr = getRoomCodeStr(roomCode)
-    setRoomCode(roomCodeStr)
-
     const codingSocket = io("ws://localhost:5001")
 
-    codingSocket.emit(joinRoomEvent, roomCodeStr)
+    codingSocket.emit(joinRoomEvent, roomCode)
 
     codingSocket.on(codeModifiedEvent, (codeState: CodeState) => {
       setCode(codeState.code)
@@ -51,7 +46,7 @@ const Room: NextPage = () => {
 
     setSocket(codingSocket)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, setSocket])
+  }, [setSocket])
 
   // periodically save code
   useEffect(() => {
@@ -76,7 +71,7 @@ const Room: NextPage = () => {
 
   const onCodeChange = (newCode: string) => {
     const codeModifiedMessage: CodeModifiedMessage = {
-      roomCode: getRoomCodeStr(roomCode),
+      roomCode,
       codeState: {
         code: newCode,
         language: "PYTHON"
@@ -89,7 +84,7 @@ const Room: NextPage = () => {
   const onCodeSubmission = () => {
     setIsLoadingOutput(true)
     const codeState: CodeExecutionMessage = {
-      roomCode: getRoomCodeStr(roomCode),
+      roomCode,
       codeState: {
         code: code,
         language: "PYTHON"
@@ -161,12 +156,14 @@ const Video: React.FunctionComponent<VideoProps> = ({ peer } ) => {
   )
 }
 
-const getRoomCodeStr = (roomCode: string | string[] | undefined): string => {
-  if (roomCode == undefined || Array.isArray(roomCode)) {
-    return ""
-  }
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const roomCode = context.params?.roomCode as string || "ROOM CODE"
 
-  return roomCode
+  return {
+    props: {
+      roomCode
+    }
+  }
 }
 
 export default Room
