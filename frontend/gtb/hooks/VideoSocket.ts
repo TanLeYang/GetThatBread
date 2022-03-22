@@ -12,7 +12,7 @@ export type PeerState = {
 
 // provides video calling functionality
 // supports calling of multiple other users
-export function useVideoSocket(roomId: string, myName: string) {
+export function useVideoSocket(roomCode: string, myName: string) {
 
   const myVideo = useRef<any>()
   const socketRef = useRef<Socket>()
@@ -32,7 +32,7 @@ export function useVideoSocket(roomId: string, myName: string) {
           myVideo.current.srcObject = currentStream
         }
 
-        socket.emit(joinVideoRoomEvent, roomId)
+        socket.emit(joinVideoRoomEvent, roomCode)
         socket.on(allVideoUsersEvent, (users: string[]) => {
           const peers = users.map((user) => {
             const peer = createPeerFromExistingUser(socket.id, user, currentStream)
