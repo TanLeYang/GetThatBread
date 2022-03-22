@@ -1,22 +1,22 @@
 import { GetServerSideProps, NextPage } from "next";
+import Container from "../components/Container";
+import Header from "../components/Header";
 import { checkAuth, UNAUTHORISED_REDIRECT } from "../services/auth";
 
 const Home: NextPage = () => {
 
   return (
-    <div>
-      <h1>
-        HOME PAGE
-      </h1>
-    </div>
+    <Container>
+      <Header/>
+    </Container>
   )
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const authResult = await checkAuth(context)
-  if (!authResult.isAuthenticated) {
-    return UNAUTHORISED_REDIRECT
-  }
+  // const authResult = await checkAuth(context)
+  // if (!authResult.isAuthenticated) {
+  //   return UNAUTHORISED_REDIRECT
+  // }
 
   return {props: {}}
 }
