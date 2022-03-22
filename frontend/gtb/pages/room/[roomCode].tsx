@@ -52,10 +52,10 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
         />
 
         <div>
-          <video className="h-20 w-20" muted autoPlay playsInline ref={myVideo}/>
+          <video className="h-60 w-60" muted autoPlay playsInline ref={myVideo}/>
           { peers.map((peer, idx) => {
             return (
-              <Video key={idx} peer={peer}/>
+              <PeerVideo key={idx} peer={peer}/>
             )
           })}
         </div>
@@ -84,11 +84,11 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
   )
 }
 
-interface VideoProps {
+interface PeerVideoProps {
   peer: PeerState
 }
 
-const Video: React.FunctionComponent<VideoProps> = ({ peer } ) => {
+const PeerVideo: React.FunctionComponent<PeerVideoProps> = ({ peer } ) => {
   const ref = useRef<any>()
 
   useEffect(() => {
@@ -100,7 +100,7 @@ const Video: React.FunctionComponent<VideoProps> = ({ peer } ) => {
   })
 
   return (
-    <video className="h-20 w-20" playsInline autoPlay ref={ref} />
+    <video className="h-60 w-60" playsInline autoPlay ref={ref} />
   )
 }
 
