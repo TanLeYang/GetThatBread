@@ -1,54 +1,54 @@
-import { GetServerSideProps, NextPage } from "next";
-import dynamic from "next/dynamic";
-import { useEffect, useRef } from "react";
+import { GetServerSideProps, NextPage } from "next"
+import dynamic from "next/dynamic"
+import { useEffect, useRef } from "react"
 import {
   CodeModifiedMessage,
-  CodeExecutionMessage,
-} from "../../constants/types/coding";
+  CodeExecutionMessage
+} from "../../constants/types/coding"
 import {
   executeCodeEvent,
-  informCodeModifiedEvent,
-} from "../../constants/socketEvents";
-import Spinner from "../../components/Spinner";
-import { PeerState, useVideoSocket } from "../../hooks/VideoSocket";
-import { useCodingSocket } from "../../hooks/CodingSocket";
+  informCodeModifiedEvent
+} from "../../constants/socketEvents"
+import Spinner from "../../components/Spinner"
+import { PeerState, useVideoSocket } from "../../hooks/VideoSocket"
+import { useCodingSocket } from "../../hooks/CodingSocket"
 const CodeEditor = dynamic(import("../../components/CodeEditor"), {
-  ssr: false,
-});
+  ssr: false
+})
 
 interface RoomProps {
-  roomCode: string;
+  roomCode: string
 }
 
 const Room: NextPage<RoomProps> = ({ roomCode }) => {
   const { code, output, isLoadingOutput, setIsLoadingOutput, codingSocketRef } =
-    useCodingSocket(roomCode);
-  const { myVideo, peers } = useVideoSocket(roomCode, "Ly");
+    useCodingSocket(roomCode)
+  const { myVideo, peers } = useVideoSocket(roomCode, "Ly")
 
   const onCodeChange = (newCode: string) => {
     const codeModifiedMessage: CodeModifiedMessage = {
       roomCode,
       codeState: {
         code: newCode,
-        language: "PYTHON",
-      },
-    };
+        language: "PYTHON"
+      }
+    }
 
-    codingSocketRef.current?.emit(informCodeModifiedEvent, codeModifiedMessage);
-  };
+    codingSocketRef.current?.emit(informCodeModifiedEvent, codeModifiedMessage)
+  }
 
   const onCodeSubmission = () => {
-    setIsLoadingOutput(true);
+    setIsLoadingOutput(true)
     const codeState: CodeExecutionMessage = {
       roomCode,
       codeState: {
         code: code,
-        language: "PYTHON",
-      },
-    };
+        language: "PYTHON"
+      }
+    }
 
-    codingSocketRef.current?.emit(executeCodeEvent, codeState);
-  };
+    codingSocketRef.current?.emit(executeCodeEvent, codeState)
+  }
 
   return (
     <div className="bg-gray-700 h-screen w-screen flex flex-col">
@@ -65,7 +65,7 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
             ref={myVideo}
           />
           {peers.map((peer, idx) => {
-            return <PeerVideo key={idx} peer={peer} />;
+            return <PeerVideo key={idx} peer={peer} />
           })}
         </div>
       </div>
@@ -88,35 +88,35 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 interface PeerVideoProps {
-  peer: PeerState;
+  peer: PeerState
 }
 
 const PeerVideo: React.FunctionComponent<PeerVideoProps> = ({ peer }) => {
-  const ref = useRef<any>();
+  const ref = useRef<any>()
 
   useEffect(() => {
     peer.instance.on("stream", (stream: MediaStream) => {
       if (ref.current) {
-        ref.current.srcObject = stream;
+        ref.current.srcObject = stream
       }
-    });
-  });
+    })
+  })
 
-  return <video className="h-60 w-60" playsInline autoPlay ref={ref} />;
-};
+  return <video className="h-60 w-60" playsInline autoPlay ref={ref} />
+}
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const roomCode = (context.params?.roomCode as string) || "ROOM CODE";
+  const roomCode = (context.params?.roomCode as string) || "ROOM CODE"
 
   return {
     props: {
-      roomCode,
-    },
-  };
-};
+      roomCode
+    }
+  }
+}
 
-export default Room;
+export default Room
