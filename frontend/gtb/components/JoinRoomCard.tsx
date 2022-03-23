@@ -1,6 +1,15 @@
+import { useState } from "react"
 import CallToActionCard from "./CallToActionCard"
 
-const JoinRoomCard: React.FunctionComponent = () => {
+interface JoinRoomCardProps {
+  navigateToRoom: (roomCode: string) => void
+}
+
+const JoinRoomCard: React.FunctionComponent<JoinRoomCardProps> = ({
+  navigateToRoom
+}) => {
+  const [roomCode, setRoomCode] = useState("")
+
   return (
     <CallToActionCard
       title={"Join an existing Room"}
@@ -13,12 +22,14 @@ const JoinRoomCard: React.FunctionComponent = () => {
             type="text"
             className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400
           text-white focus:ring-blue-500 focus:border-blue-500"
+            onChange={(e) => setRoomCode(e.target.value)}
             required
           />
         </label>
-        <a
-          href="#"
-          className="w-full sm:w-auto focus:ring-4 focus:outline-none  text-white rounded-lg inline-flex items-center justify-center px-4 py-2.5 bg-gray-700 hover:bg-gray-600 focus:ring-gray-700"
+        <button
+          className="w-full sm:w-auto focus:ring-4 focus:outline-none text-white rounded-lg inline-flex
+          items-center justify-center px-4 py-2.5 bg-gray-700 hover:bg-gray-600 focus:ring-gray-700"
+          onClick={() => navigateToRoom(roomCode)}
         >
           <svg
             className="mr-3 w-7 h-7"
@@ -38,7 +49,7 @@ const JoinRoomCard: React.FunctionComponent = () => {
           <div className="text-left">
             <div className="mb-1 text-xs"> Join Room </div>
           </div>
-        </a>
+        </button>
       </div>
     </CallToActionCard>
   )
