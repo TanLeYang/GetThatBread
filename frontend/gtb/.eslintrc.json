@@ -1,12 +1,13 @@
 {
   "extends": [
-    "next/core-web-vitals"
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
     "quotes": [
         "warn",
         "double"
     ],
-    "no-unused-vars": "warn"
+    "@typescript-eslint/no-unused-vars": "warn"
   }
 }
