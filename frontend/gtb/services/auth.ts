@@ -21,7 +21,7 @@ const UNAUTHORISED_REDIRECT = {
 const checkAuth = async (context: GetServerSidePropsContext): Promise<AuthResult> => {
   try {
     const { Auth } = withSSRContext(context)
-    const user = await getUser(Auth) 
+    const user = await getUser(Auth)
     return {
       isAuthenticated: user !== undefined,
       user
@@ -29,7 +29,7 @@ const checkAuth = async (context: GetServerSidePropsContext): Promise<AuthResult
   } catch (err) {
     return {
       isAuthenticated: false,
-      user: undefined 
+      user: undefined
     }
   }
 }

@@ -2,15 +2,14 @@ import { GetServerSideProps, NextPage } from "next";
 import CallToActionCard from "../components/CallToActionCard";
 import Container from "../components/Container";
 import Header from "../components/Header";
-import Image from "next/image"
-import heroSplashImg from "../public/images/herosplash.png"
+import Image from "next/image";
+import heroSplashImg from "../public/images/herosplash.png";
 import { checkAuth, UNAUTHORISED_REDIRECT } from "../services/auth";
 
 const Home: NextPage = () => {
-
   return (
     <Container>
-      <Header/>
+      <Header />
       <div className="container flex flex-col lg:flex-row lg:mb-20 items-center justify-center gap-12 h-full">
         <CallToActionCard
           title="Create a new Room"
@@ -27,8 +26,8 @@ const Home: NextPage = () => {
         />
       </div>
     </Container>
-  )
-}
+  );
+};
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   // const authResult = await checkAuth(context)
@@ -36,7 +35,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   //   return UNAUTHORISED_REDIRECT
   // }
 
-  return {props: {}}
-}
+  return { props: {} };
+};
 
-export default Home
+export default Home;

@@ -1,15 +1,18 @@
-import AceEditor from "react-ace"
+import AceEditor from "react-ace";
 
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-twilight";
-import "ace-builds/src-noconflict/ext-language_tools"
+import "ace-builds/src-noconflict/ext-language_tools";
 
 interface CodeEditorProps {
-  value: string,
-  onChange: (newValue: string) => void
+  value: string;
+  onChange: (newValue: string) => void;
 }
 
-const CodeEditor: React.FunctionComponent<CodeEditorProps> = ({ value, onChange }) => {
+const CodeEditor: React.FunctionComponent<CodeEditorProps> = ({
+  value,
+  onChange,
+}) => {
   return (
     <AceEditor
       className="flex-grow"
@@ -34,7 +37,7 @@ const CodeEditor: React.FunctionComponent<CodeEditorProps> = ({ value, onChange 
       wrapEnabled={true}
       height="95%"
     />
-  )
-}
+  );
+};
 
-export default CodeEditor
+export default CodeEditor;

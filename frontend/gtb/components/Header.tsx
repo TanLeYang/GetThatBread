@@ -5,7 +5,7 @@ const Header: React.FunctionComponent = () => {
         <h1 className="text-white text-xl">GetThatBread 🍞</h1>
       </nav>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
