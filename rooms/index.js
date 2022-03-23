@@ -1,17 +1,24 @@
 import "dotenv/config"
 import express from "express"
+import cors from "cors"
 import { createRoom, getRoom, initalizeDynamoDB } from "./dynamo.js"
 
-const PORT = process.env.PORT || 5002
+const PORT = process.env.PORT || 5003
 const app = express()
+
+app.use(cors())
+
+app.use(express.json())
 
 app.get("/", (req, res) => {
   res.send("HI")
 })
 
-app.get("/room/:roomCode", (req, res) => {
+app.get("/room/:roomCode", async (req, res) => {
   const roomCode = req.params.roomCode
-  const room = getRoom
+  const room = await getRoom(roomCode)
+
+  console.log(`ROOM FOUND ${room}`)
 
   if (room) {
     res.status(200).json({

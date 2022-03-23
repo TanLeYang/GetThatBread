@@ -2,13 +2,21 @@ import { useState } from "react"
 import CallToActionCard from "./CallToActionCard"
 
 interface JoinRoomCardProps {
-  navigateToRoom: (roomCode: string) => void
+  navigateToRoom: (roomCode: string) => Promise<boolean>
 }
 
 const JoinRoomCard: React.FunctionComponent<JoinRoomCardProps> = ({
   navigateToRoom
 }) => {
   const [roomCode, setRoomCode] = useState("")
+  const [showingRoomCodeWarning, setShowingRoomCodeWarning] = useState(false)
+
+  const onJoinRoomClick = async () => {
+    const success = await navigateToRoom(roomCode)
+    if (!success) {
+      setShowingRoomCodeWarning(true)
+    }
+  }
 
   return (
     <CallToActionCard
@@ -29,7 +37,7 @@ const JoinRoomCard: React.FunctionComponent<JoinRoomCardProps> = ({
         <button
           className="w-full sm:w-auto focus:ring-4 focus:outline-none text-white rounded-lg inline-flex
           items-center justify-center px-4 py-2.5 bg-gray-700 hover:bg-gray-600 focus:ring-gray-700"
-          onClick={() => navigateToRoom(roomCode)}
+          onClick={() => onJoinRoomClick()}
         >
           <svg
             className="mr-3 w-7 h-7"
@@ -51,6 +59,11 @@ const JoinRoomCard: React.FunctionComponent<JoinRoomCardProps> = ({
           </div>
         </button>
       </div>
+      {showingRoomCodeWarning && (
+        <h1 className="text-red-400">
+          No room found, please check the room code again
+        </h1>
+      )}
     </CallToActionCard>
   )
 }
