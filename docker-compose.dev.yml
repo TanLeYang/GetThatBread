@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  dynamodb:
+    image: amazon/dynamodb-local
+    container_name: local-dynamodb
+    ports:
+      - 8000:8000
+
+  redis:
+    image: redis
+    container_name: local-redis
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    ports:
+      - 6379:6379

@@ -3,6 +3,7 @@ import Container from "../components/Container"
 import Header from "../components/Header"
 import CreateRoomCard from "../components/CreateRoomCard"
 import JoinRoomCard from "../components/JoinRoomCard"
+import { checkAuth, UNAUTHORISED_REDIRECT } from "../services/auth"
 
 const Home: NextPage = () => {
   return (
@@ -18,10 +19,10 @@ const Home: NextPage = () => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  // const authResult = await checkAuth(context)
-  // if (!authResult.isAuthenticated) {
-  //   return UNAUTHORISED_REDIRECT
-  // }
+  const authResult = await checkAuth(context)
+  if (!authResult.isAuthenticated) {
+    return UNAUTHORISED_REDIRECT
+  }
 
   return { props: {} }
 }

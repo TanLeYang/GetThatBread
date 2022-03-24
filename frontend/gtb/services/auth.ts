@@ -1,10 +1,11 @@
 import { withSSRContext } from "aws-amplify"
 import { GetServerSidePropsContext } from "next"
+import { amplifyConfig } from "../config/aws-exports"
 import { User } from "../constants/types/user"
 
-interface AuthResult {
-  isAuthenticated: boolean,
-  user?: User,
+export interface AuthResult {
+  isAuthenticated: boolean
+  user?: User
 }
 
 interface AuthService {
@@ -18,9 +19,12 @@ const UNAUTHORISED_REDIRECT = {
   }
 }
 
-const checkAuth = async (context: GetServerSidePropsContext): Promise<AuthResult> => {
+const checkAuth = async (
+  context: GetServerSidePropsContext
+): Promise<AuthResult> => {
   try {
     const { Auth } = withSSRContext(context)
+    Auth.configure({ ...amplifyConfig, ssr: true })
     const user = await getUser(Auth)
     return {
       isAuthenticated: user !== undefined,
@@ -52,8 +56,4 @@ const getUser = async (auth: AuthService) => {
   }
 }
 
-export {
-  checkAuth,
-  getUser,
-  UNAUTHORISED_REDIRECT
-}
+export { checkAuth, getUser, UNAUTHORISED_REDIRECT }

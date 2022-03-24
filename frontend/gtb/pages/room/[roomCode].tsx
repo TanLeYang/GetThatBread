@@ -12,6 +12,8 @@ import {
 import Spinner from "../../components/Spinner"
 import { PeerState, useVideoSocket } from "../../hooks/VideoSocket"
 import { useCodingSocket } from "../../hooks/CodingSocket"
+import { checkRoomExists } from "../../services/room"
+import { checkAuth, UNAUTHORISED_REDIRECT } from "../../services/auth"
 const CodeEditor = dynamic(import("../../components/CodeEditor"), {
   ssr: false
 })
@@ -110,7 +112,21 @@ const PeerVideo: React.FunctionComponent<PeerVideoProps> = ({ peer }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const authResult = await checkAuth(context)
+  if (!authResult.isAuthenticated) {
+    return UNAUTHORISED_REDIRECT
+  }
+
   const roomCode = (context.params?.roomCode as string) || "ROOM CODE"
+  const roomExists = await checkRoomExists(roomCode)
+  if (!roomExists) {
+    return {
+      redirect: {
+        destination: "/home",
+        permanent: false
+      }
+    }
+  }
 
   return {
     props: {
