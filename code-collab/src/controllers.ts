@@ -1,7 +1,16 @@
-import { CodeService, CodeState } from "./coding"
-import { addOrUpdateDocument, getOrCreateDocument, RoomDocument } from "./dynamo"
+import { CodeChangeEventArgs, CodeService, CodeState } from "./coding"
+import {
+  addOrUpdateDocument,
+  getOrCreateDocument,
+  RoomDocument
+} from "./dynamo"
 import AWSLambda from "./lambda"
-import { CodeExecutionMessage, CodeModifiedMessage, SaveCodeMessage, SocketType } from "./socket"
+import {
+  CodeExecutionMessage,
+  CodeModifiedMessage,
+  SaveCodeMessage,
+  SocketType
+} from "./socket"
 
 export function createJoinRoomController(codeService: CodeService) {
   return async (ws: SocketType, msg: string) => {
@@ -15,17 +24,33 @@ export function createJoinRoomController(codeService: CodeService) {
     }
     ws.emit("initialState", initialCodeState)
 
-    const codeChangeSubscription = codeService.subscribeCodeChangeEvent(ws.id, roomCode, (codeState: CodeState) => {
-      ws.emit("codeModified", codeState)
-    })
+    const codeChangeSubscription = codeService.subscribeCodeChangeEvent(
+      ws.id,
+      roomCode,
+      (args: CodeChangeEventArgs) => {
+        if (args.publisherID === ws.id) {
+          return
+        }
+        ws.emit("codeModified", args.codeState)
+      }
+    )
 
-    const codeExecutionSubscription = codeService.subscribeCodeExecutionEvent(ws.id, roomCode, () => {
-      ws.emit("codeExecutionStarted")
-    })
+    const codeExecutionSubscription = codeService.subscribeCodeExecutionEvent(
+      ws.id,
+      roomCode,
+      () => {
+        ws.emit("codeExecutionStarted")
+      }
+    )
 
-    const codeExecutionResultSubscription = codeService.subscribeCodeExecuionResultEvent(ws.id, roomCode, (output: string) => {
-      ws.emit("codeExecutionResult", output)
-    })
+    const codeExecutionResultSubscription =
+      codeService.subscribeCodeExecuionResultEvent(
+        ws.id,
+        roomCode,
+        (output: string) => {
+          ws.emit("codeExecutionResult", output)
+        }
+      )
 
     return await Promise.all([
       codeChangeSubscription,
@@ -36,8 +61,12 @@ export function createJoinRoomController(codeService: CodeService) {
 }
 
 export function createCodeModifiedController(codeService: CodeService) {
-  return async (msg: CodeModifiedMessage) => {
-    return codeService.publishCodeChangeEvent(msg.roomCode, msg.codeState)
+  return async (ws: SocketType, msg: CodeModifiedMessage) => {
+    const codeChangeEventArgs: CodeChangeEventArgs = {
+      publisherID: ws.id,
+      codeState: msg.codeState
+    }
+    return codeService.publishCodeChangeEvent(msg.roomCode, codeChangeEventArgs)
   }
 }
 
@@ -60,15 +89,18 @@ export function createCodeExecutionController(codeService: CodeService) {
     const lambdaParams = {
       FunctionName: "code-exec-dev-main",
       Payload: JSON.stringify({
-        "body": {
-          "code": msg.codeState.code
+        body: {
+          code: msg.codeState.code
         }
       })
     }
 
     const result = await AWSLambda.invoke(lambdaParams).promise()
     if (result.$response.error) {
-      codeService.publishCodeExecutionResultEvent(msg.roomCode, "something went wrong, please try again")
+      codeService.publishCodeExecutionResultEvent(
+        msg.roomCode,
+        "something went wrong, please try again"
+      )
     }
 
     const data = JSON.parse(result.Payload.toString())

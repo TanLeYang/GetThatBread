@@ -1,11 +1,23 @@
 import "dotenv/config"
-import express from "express";
+import express from "express"
 import * as redis from "redis"
 import http from "http"
-import createCodeService from "./coding";
-import { CodeExecutionMessage, CodeModifiedMessage, initializeSocketServer, SaveCodeMessage, SocketType } from "./socket";
-import { createCodeExecutionController, createCodeModifiedController, createDisconnectController, createJoinRoomController, createSaveCodeController } from "./controllers";
-import { initializeDynamoDB } from "./dynamo";
+import createCodeService from "./coding"
+import {
+  CodeExecutionMessage,
+  CodeModifiedMessage,
+  initializeSocketServer,
+  SaveCodeMessage,
+  SocketType
+} from "./socket"
+import {
+  createCodeExecutionController,
+  createCodeModifiedController,
+  createDisconnectController,
+  createJoinRoomController,
+  createSaveCodeController
+} from "./controllers"
+import { initializeDynamoDB } from "./dynamo"
 
 // Set up redis
 const REDIS_SERVER = process.env.REDIS_URL
@@ -35,7 +47,7 @@ io.on("connection", (socket: SocketType) => {
   })
 
   socket.on("informCodeModified", async (msg: CodeModifiedMessage) => {
-    await codeChangeController(msg)
+    await codeChangeController(socket, msg)
   })
 
   socket.on("saveCode", async (msg: SaveCodeMessage) => {
@@ -51,11 +63,7 @@ io.on("connection", (socket: SocketType) => {
   })
 })
 
-Promise.all([
-  redisClient.connect(),
-  initializeDynamoDB()
-])
-.then(() => {
+Promise.all([redisClient.connect(), initializeDynamoDB()]).then(() => {
   server.listen(IO_PORT, () => {
     console.log(`server listening on port ${IO_PORT}`)
   })

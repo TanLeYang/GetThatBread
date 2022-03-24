@@ -5,6 +5,11 @@ export type CodeState = {
   language: CodeLanguage
 }
 
+export type CodeChangeEventArgs = {
+  publisherID: string
+  codeState: CodeState
+}
+
 export type CodeLanguage = "PYTHON" | ""
 
 export type SubscriptionState = Map<string, RedisClientType[]>
@@ -13,7 +18,7 @@ export interface CodeService {
   subscribeCodeChangeEvent(
     subscriberID: string,
     roomCode: string,
-    callback: (codeState: CodeState) => void
+    callback: (args: CodeChangeEventArgs) => void
   ): Promise<void>
 
   subscribeCodeExecutionEvent(
@@ -30,13 +35,22 @@ export interface CodeService {
 
   unsubscribe(subscriberID: string): Promise<void>
 
-  publishCodeChangeEvent(roomCode: string, codeState: CodeState): Promise<void>
+  publishCodeChangeEvent(
+    roomCode: string,
+    args: CodeChangeEventArgs
+  ): Promise<void>
+
   publishCodeExecutionEvent(roomCode: string): Promise<void>
-  publishCodeExecutionResultEvent(roomCode: string, output: string): Promise<void>
+
+  publishCodeExecutionResultEvent(
+    roomCode: string,
+    output: string
+  ): Promise<void>
 }
 
-export default function createCodeService(redisClient: RedisClientType): CodeService {
-
+export default function createCodeService(
+  redisClient: RedisClientType
+): CodeService {
   let subscriptions: SubscriptionState = new Map()
 
   const codeChangeEventName = (roomCode: string) => `cc-${roomCode}`
@@ -46,13 +60,13 @@ export default function createCodeService(redisClient: RedisClientType): CodeSer
   const subscribeCodeChangeEvent = async (
     subscriberID: string,
     roomCode: string,
-    callback: (codeState: CodeState) => void
+    callback: (args: CodeChangeEventArgs) => void
   ): Promise<void> => {
     const subscriber = redisClient.duplicate()
     await subscriber.connect()
     await subscriber.subscribe(codeChangeEventName(roomCode), (msg) => {
-      const codeState = JSON.parse(msg)
-      callback(codeState)
+      const codeChangeEventArgs: CodeChangeEventArgs = JSON.parse(msg)
+      callback(codeChangeEventArgs)
     })
 
     addSubscription(subscriberID, subscriber)
@@ -79,9 +93,12 @@ export default function createCodeService(redisClient: RedisClientType): CodeSer
   ): Promise<void> => {
     const subscriber = redisClient.duplicate()
     await subscriber.connect()
-    await subscriber.subscribe(codeExecutionResultEventName(roomCode), (output) => {
-      callback(output)
-    })
+    await subscriber.subscribe(
+      codeExecutionResultEventName(roomCode),
+      (output) => {
+        callback(output)
+      }
+    )
 
     addSubscription(subscriberID, subscriber)
   }
@@ -96,8 +113,11 @@ export default function createCodeService(redisClient: RedisClientType): CodeSer
     Promise.all(subs.map((subscriber) => subscriber.disconnect()))
   }
 
-  const publishCodeChangeEvent = async (roomCode: string, codeState: CodeState): Promise<void> => {
-    const rawMessage = JSON.stringify(codeState)
+  const publishCodeChangeEvent = async (
+    roomCode: string,
+    args: CodeChangeEventArgs
+  ): Promise<void> => {
+    const rawMessage = JSON.stringify(args)
     await redisClient.publish(codeChangeEventName(roomCode), rawMessage)
   }
 
@@ -105,7 +125,10 @@ export default function createCodeService(redisClient: RedisClientType): CodeSer
     await redisClient.publish(codeExecutionEventName(roomCode), "")
   }
 
-  const publishCodeExecutionResultEvent = async (roomCode: string, output: string): Promise<void> => {
+  const publishCodeExecutionResultEvent = async (
+    roomCode: string,
+    output: string
+  ): Promise<void> => {
     await redisClient.publish(codeExecutionResultEventName(roomCode), output)
   }
 
