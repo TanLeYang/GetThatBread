@@ -1,7 +1,7 @@
 import "dotenv/config"
-import express from "express";
+import express from "express"
 import { createServer } from "http"
-import { Server } from "socket.io";
+import { Server } from "socket.io"
 
 const app = express()
 const server = createServer(app)
@@ -24,7 +24,8 @@ io.on("connection", (socket) => {
     }
 
     socketToRoom[socket.id] = roomId
-    const usersInRoom = users[roomId].filter(id => id !== socket.id)
+    socket.join(roomId)
+    const usersInRoom = users[roomId].filter((id) => id !== socket.id)
     socket.emit("allUsers", usersInRoom)
   })
 
@@ -52,7 +53,9 @@ io.on("connection", (socket) => {
     if (!usersInRoom) {
       return
     }
-    users[roomId] = usersInRoom.filter(id => id !== socket.id)
+    users[roomId] = usersInRoom.filter((id) => id !== socket.id)
+
+    io.to(roomId).emit("userLeft", socket.id)
   })
 })
 

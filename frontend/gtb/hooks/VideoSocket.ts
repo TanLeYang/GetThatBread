@@ -7,7 +7,8 @@ import {
   userVideoJoinedEvent,
   sendingVideoSignalEvent,
   returningVideoSignalEvent,
-  receiveReturningVideoSignalEvent
+  receiveReturningVideoSignalEvent,
+  userVideoLeftEvent
 } from "../constants/socketEvents"
 
 export type PeerState = {
@@ -64,6 +65,11 @@ export function useVideoSocket(roomCode: string) {
         socket.on(receiveReturningVideoSignalEvent, ({ from, signal }) => {
           const peer = peersRef.current.find((p) => p.peerId === from)
           peer?.instance.signal(signal)
+        })
+
+        socket.on(userVideoLeftEvent, (userId) => {
+          peersRef.current = peersRef.current.filter((p) => p.peerId !== userId)
+          setPeers(peersRef.current)
         })
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps

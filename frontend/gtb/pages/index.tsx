@@ -1,18 +1,11 @@
-import type { NextPage } from "next"
-import { useContext, useEffect } from "react"
-import AuthContext from "../contexts/authContext"
+import type { GetServerSideProps, NextPage } from "next"
+import { useEffect } from "react"
 import HeroSection from "../components/Hero"
 import Container from "../components/Container"
 import Header from "../components/Header"
+import { checkAuth } from "../services/auth"
 
 const Landing: NextPage = () => {
-  const { user, refresh } = useContext(AuthContext)
-
-  useEffect(() => {
-    refresh()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   return (
     <Container>
       <Header />
@@ -21,6 +14,20 @@ const Landing: NextPage = () => {
       </section>
     </Container>
   )
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const authResult = await checkAuth(context)
+  if (authResult.isAuthenticated) {
+    return {
+      redirect: {
+        destination: "/home",
+        permanent: false
+      }
+    }
+  }
+
+  return { props: {} }
 }
 
 export default Landing
