@@ -21,7 +21,7 @@ const JoinRoomCard: React.FunctionComponent = () => {
   return (
     <CallToActionCard
       title={"Join an existing Room"}
-      subtitle={"Join an existing code by entering the unique Room Code!"}
+      subtitle={"Join an existing room by entering the unique Room Code!"}
     >
       <>
         <div className="flex justify-center space-x-14">

@@ -15,6 +15,7 @@ export function useCodingSocket(roomCode: string) {
   const codingSocketRef = useRef<Socket>()
   const latestOutput = useRef("")
 
+  const [codeToSubmit, setCodeToSubmit] = useState("")
   const [code, setCode] = useState("")
   const [output, setOutput] = useState("")
   const [isLoadingOutput, setIsLoadingOutput] = useState(false)
@@ -29,10 +30,12 @@ export function useCodingSocket(roomCode: string) {
     codingSocket.emit(joinRoomEvent, roomCode)
 
     codingSocket.on(codeModifiedEvent, (codeState: CodeState) => {
+      setCodeToSubmit(codeState.code)
       setCode(codeState.code)
     })
 
     codingSocket.on(initialStateEvent, (codeState: CodeState) => {
+      setCodeToSubmit(codeState.code)
       setCode(codeState.code)
     })
 
@@ -69,6 +72,8 @@ export function useCodingSocket(roomCode: string) {
 
   return {
     code,
+    codeToSubmit,
+    setCodeToSubmit,
     setCode,
     output,
     setOutput,

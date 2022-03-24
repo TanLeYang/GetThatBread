@@ -1,7 +1,8 @@
-import { Auth } from "aws-amplify";
-import Image from "next/image";
-import heroSplashImg from "../public/images/herosplash.png";
-import { GithubLoginButton } from "react-social-login-buttons";
+import { Auth } from "aws-amplify"
+import Image from "next/image"
+import heroSplashImg from "../public/images/herosplash.png"
+import { GithubLoginButton } from "react-social-login-buttons"
+import Link from "next/link"
 
 const HeroSection = () => {
   return (
@@ -9,8 +10,8 @@ const HeroSection = () => {
       <HeroText />
       <HeroImage />
     </div>
-  );
-};
+  )
+}
 
 const HeroText = () => {
   return (
@@ -25,20 +26,25 @@ const HeroText = () => {
       <div className="flex justify-center flex-wrap gap-6">
         <GithubLoginButton
           onClick={() => {
-            Auth.federatedSignIn({ customProvider: "Github" });
+            Auth.federatedSignIn({ customProvider: "Github" })
           }}
         />
       </div>
+      <Link href="/home">
+        <a className="text-gray-200 text-2xl ml-2 mt-5">
+          {"Let's get started!"}
+        </a>
+      </Link>
     </div>
-  );
-};
+  )
+}
 
 const HeroImage = () => {
   return (
     <div className="flex justify-center flex-1 mb-10 md:mb-16 lg:mb-0">
       <Image src={heroSplashImg} alt="Stock coding picture" />
     </div>
-  );
-};
+  )
+}
 
-export default HeroSection;
+export default HeroSection

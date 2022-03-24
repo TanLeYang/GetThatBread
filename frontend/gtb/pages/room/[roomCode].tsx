@@ -23,8 +23,15 @@ interface RoomProps {
 }
 
 const Room: NextPage<RoomProps> = ({ roomCode }) => {
-  const { code, output, isLoadingOutput, setIsLoadingOutput, codingSocketRef } =
-    useCodingSocket(roomCode)
+  const {
+    code,
+    codeToSubmit,
+    setCodeToSubmit,
+    output,
+    isLoadingOutput,
+    setIsLoadingOutput,
+    codingSocketRef
+  } = useCodingSocket(roomCode)
   const { myVideo, peers } = useVideoSocket(roomCode)
 
   const onCodeChange = (newCode: string) => {
@@ -36,6 +43,7 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
       }
     }
 
+    setCodeToSubmit(newCode)
     codingSocketRef.current?.emit(informCodeModifiedEvent, codeModifiedMessage)
   }
 
@@ -44,7 +52,7 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
     const codeState: CodeExecutionMessage = {
       roomCode,
       codeState: {
-        code: code,
+        code: codeToSubmit,
         language: "PYTHON"
       }
     }

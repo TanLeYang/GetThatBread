@@ -43,6 +43,7 @@ const getUser = async (auth: AuthService) => {
     const { attributes } = await auth.currentAuthenticatedUser({
       bypassCache: true
     })
+    console.log(`USER ATTRIBUTES: ${attributes}`)
     const user = {
       id: attributes.sub,
       email: attributes.email,
