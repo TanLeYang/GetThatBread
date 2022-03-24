@@ -1,10 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import io, { Socket } from "socket.io-client";
-import { codeExecutionResultEvent, codeModifiedEvent, initialStateEvent, joinRoomEvent, saveCodeEvent } from "../constants/socketEvents";
-import { CodeState, SaveCodeMessage } from "../constants/types/coding";
+import { useEffect, useRef, useState } from "react"
+import io, { Socket } from "socket.io-client"
+import {
+  codeExecutionResultEvent,
+  codeModifiedEvent,
+  initialStateEvent,
+  joinRoomEvent,
+  saveCodeEvent
+} from "../constants/socketEvents"
+import { CodeState, SaveCodeMessage } from "../constants/types/coding"
 
 export function useCodingSocket(roomCode: string) {
-
   const saveCodeInterval = 5000
 
   const codingSocketRef = useRef<Socket>()
@@ -15,7 +20,8 @@ export function useCodingSocket(roomCode: string) {
   const [isLoadingOutput, setIsLoadingOutput] = useState(false)
 
   useEffect(() => {
-    const codingServerUrl = process.env.NEXT_PUBLIC_CODING_SERVER_URL || "ws://localhost:5001"
+    const codingServerUrl =
+      process.env.NEXT_PUBLIC_CODING_SERVER_URL || "ws://localhost:5001"
     const codingSocket = io(codingServerUrl)
 
     codingSocketRef.current = codingSocket
@@ -32,12 +38,12 @@ export function useCodingSocket(roomCode: string) {
 
     codingSocket.on(codeExecutionResultEvent, (newOutput: string) => {
       setIsLoadingOutput(false)
-      setOutput(prev => {
+      setOutput((prev) => {
         latestOutput.current = prev + "\n" + newOutput
         return latestOutput.current
       })
     })
-  })
+  }, [roomCode])
 
   useEffect(() => {
     const socket = codingSocketRef.current

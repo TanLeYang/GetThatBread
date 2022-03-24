@@ -25,7 +25,7 @@ interface RoomProps {
 const Room: NextPage<RoomProps> = ({ roomCode }) => {
   const { code, output, isLoadingOutput, setIsLoadingOutput, codingSocketRef } =
     useCodingSocket(roomCode)
-  const { myVideo, peers } = useVideoSocket(roomCode, "Ly")
+  const { myVideo, peers } = useVideoSocket(roomCode)
 
   const onCodeChange = (newCode: string) => {
     const codeModifiedMessage: CodeModifiedMessage = {
