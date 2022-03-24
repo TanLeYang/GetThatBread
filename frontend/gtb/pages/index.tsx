@@ -1,5 +1,4 @@
 import type { GetServerSideProps, NextPage } from "next"
-import { useEffect } from "react"
 import HeroSection from "../components/Hero"
 import Container from "../components/Container"
 import Header from "../components/Header"
