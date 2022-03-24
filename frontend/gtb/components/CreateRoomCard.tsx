@@ -1,16 +1,32 @@
+import { useRouter } from "next/router"
+import { useState } from "react"
+import { createRoom } from "../services/room"
 import CallToActionCard from "./CallToActionCard"
 
-const CreateRoomCard: React.FunctionComponent = () => {
+const CreateRoomCard: React.FunctionComponent = ({}) => {
+  const router = useRouter()
+
+  const [showingRoomCreationWarning, setShowingRoomCreationWarning] =
+    useState(false)
+
+  const onCreateRoomClick = async () => {
+    const roomCode = await createRoom()
+    if (!roomCode) {
+      setShowingRoomCreationWarning(true)
+      return
+    }
+
+    router.push(`/room/${roomCode}`)
+  }
+
   return (
     <CallToActionCard
       title="Create a new Room"
       subtitle="Get started by creating a new room and giving your interview buddies the unique Room Code!"
     >
       <div className="justify-center items-center space-y-4 sm:flex sm:space-y-0 sm:space-x-4">
-        <a
-          href="#"
-          className="w-full sm:w-auto focus:ring-4 focus:outline-none  text-white rounded-lg inline-flex items-center justify-center px-4 py-2.5 bg-gray-700 hover:bg-gray-600 focus:ring-gray-700"
-        >
+        <button className="w-full sm:w-auto focus:ring-4 focus:outline-none  text-white rounded-lg inline-flex items-center justify-center px-4 py-2.5 bg-gray-700 hover:bg-gray-600 focus:ring-gray-700">
+          onClick={onCreateRoomClick}
           <svg
             className="mr-3 w-7 h-7"
             aria-hidden="true"
@@ -29,8 +45,13 @@ const CreateRoomCard: React.FunctionComponent = () => {
           <div className="text-left">
             <div className="mb-1 text-xs"> Create Room </div>
           </div>
-        </a>
+        </button>
       </div>
+      {showingRoomCreationWarning && (
+        <h1 className="text-red-400">
+          Sorry, something went wrong, please try again
+        </h1>
+      )}
     </CallToActionCard>
   )
 }

@@ -40,6 +40,7 @@ app.post("/room", async (req, res) => {
   if (!newRoomCode) {
     res.status(500).json({
       success: false,
+      roomCode: "",
       errorMsg: "Could not create a new room, try again later"
     })
   } else {

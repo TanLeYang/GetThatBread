@@ -1,21 +1,21 @@
+import { useRouter } from "next/router"
 import { useState } from "react"
+import { checkRoomExists } from "../services/room"
 import CallToActionCard from "./CallToActionCard"
 
-interface JoinRoomCardProps {
-  navigateToRoom: (roomCode: string) => Promise<boolean>
-}
-
-const JoinRoomCard: React.FunctionComponent<JoinRoomCardProps> = ({
-  navigateToRoom
-}) => {
+const JoinRoomCard: React.FunctionComponent = () => {
+  const router = useRouter()
   const [roomCode, setRoomCode] = useState("")
   const [showingRoomCodeWarning, setShowingRoomCodeWarning] = useState(false)
 
   const onJoinRoomClick = async () => {
-    const success = await navigateToRoom(roomCode)
-    if (!success) {
+    const roomExists = checkRoomExists(roomCode)
+    if (!roomExists) {
       setShowingRoomCodeWarning(true)
+      return
     }
+
+    router.push(`room/${roomCode}`)
   }
 
   return (
