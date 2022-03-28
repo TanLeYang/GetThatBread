@@ -1,6 +1,5 @@
 import "dotenv/config"
 import express from "express"
-import * as redis from "redis"
 import http from "http"
 import createCodeService from "./coding"
 import {
@@ -18,19 +17,16 @@ import {
   createSaveCodeController
 } from "./controllers"
 import { initializeDynamoDB } from "./dynamo"
+import { initalizeRedisClient } from "./redis"
 
 // Set up redis
-const REDIS_SERVER = process.env.REDIS_URL
-const redisClient = redis.createClient({
-  url: REDIS_SERVER
-})
-export type RedisClientType = typeof redisClient
+const redisClient = initalizeRedisClient()
 
 // Set up socketio
 const app = express()
 const server = http.createServer(app)
 const io = initializeSocketServer(server)
-const IO_PORT = 5001
+const IO_PORT = process.env.PORT || 5001
 
 // Intialize controllers and their dependencies
 const codeService = createCodeService(redisClient)

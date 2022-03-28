@@ -1,4 +1,4 @@
-import { RedisClientType } from "./server"
+import { RedisClientType } from "./redis"
 
 export type CodeState = {
   code: string
