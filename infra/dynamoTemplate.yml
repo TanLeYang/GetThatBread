@@ -1,0 +1,15 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  RoomsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Rooms
+      AttributeDefinitions:
+        - AttributeName: "roomCode"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "roomCode"
+          KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
