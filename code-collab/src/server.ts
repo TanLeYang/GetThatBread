@@ -17,10 +17,10 @@ import {
   createSaveCodeController
 } from "./controllers"
 import { initializeDynamoDB } from "./dynamo"
-import { initalizeRedisClient } from "./redis"
+import { newRedisClient, initializeRedisClient } from "./redis"
 
 // Set up redis
-const redisClient = initalizeRedisClient()
+const redisClient = newRedisClient()
 
 // Set up socketio
 const app = express()
@@ -59,8 +59,10 @@ io.on("connection", (socket: SocketType) => {
   })
 })
 
-Promise.all([redisClient.connect(), initializeDynamoDB()]).then(() => {
-  server.listen(IO_PORT, () => {
-    console.log(`server listening on port ${IO_PORT}`)
-  })
-})
+Promise.all([initializeRedisClient(redisClient), initializeDynamoDB()]).then(
+  () => {
+    server.listen(IO_PORT, () => {
+      console.log(`server listening on port ${IO_PORT}`)
+    })
+  }
+)
