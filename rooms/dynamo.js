@@ -11,11 +11,11 @@ const serviceConfiguration = {
 const dynamoDB = new AWS.DynamoDB(serviceConfiguration)
 const dynamoClient = new AWS.DynamoDB.DocumentClient({
   ...serviceConfiguration,
-  convertEmptyValues: true
+  convertEmptyValues: false
 })
 
 const TABLE_NAME = "Rooms"
-const tableParams = {
+const TABLE_PARAMS = {
   TableName: TABLE_NAME,
   KeySchema: [{ AttributeName: "roomCode", KeyType: "HASH" }],
   AttributeDefinitions: [{ AttributeName: "roomCode", AttributeType: "S" }],
@@ -25,15 +25,15 @@ const tableParams = {
   }
 }
 
-export function initalizeDynamoDB() {
+export async function initalizeDynamoDB() {
   if (process.env.NODE_ENV !== "PRODUCTION") {
-    return createTable()
+    return await createTable()
   }
 }
 
-function createTable() {
+async function createTable() {
   return dynamoDB
-    .createTable(tableParams)
+    .createTable(TABLE_PARAMS)
     .promise()
     .then((data) => {
       console.log(
@@ -72,7 +72,9 @@ export async function createRoom() {
   const params = {
     TableName: TABLE_NAME,
     Item: {
-      roomCode: newRoomCode
+      roomCode: newRoomCode,
+      content: "",
+      language: "PYTHON"
     }
   }
 

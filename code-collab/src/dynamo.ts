@@ -1,8 +1,8 @@
 import AWS from "aws-sdk"
 import { CodeLanguage } from "./coding"
 
-const AWS_REGION = "local"
-const AWS_ENDPOINT = "http://localhost:8000"
+const AWS_REGION = process.env.AWS_REGION || "local"
+const AWS_ENDPOINT = process.env.DYNAMO_ENDPOINT || "http://localhost:8000"
 const serviceConfiguration = {
   region: AWS_REGION,
   endpoint: AWS_ENDPOINT
@@ -10,20 +10,15 @@ const serviceConfiguration = {
 
 const dynamoDB = new AWS.DynamoDB(serviceConfiguration)
 const dynamoClient = new AWS.DynamoDB.DocumentClient({
-  region: AWS_REGION,
-  endpoint: AWS_ENDPOINT,
-  convertEmptyValues: true
+  ...serviceConfiguration,
+  convertEmptyValues: false
 })
 
-const TABLE_NAME = "Docs"
-const tableParams: AWS.DynamoDB.CreateTableInput = {
+const TABLE_NAME = "Rooms"
+const TABLE_PARAMS: AWS.DynamoDB.CreateTableInput = {
   TableName: TABLE_NAME,
-  KeySchema: [
-    { AttributeName: "roomCode", KeyType: "HASH" }
-  ],
-  AttributeDefinitions: [
-    { AttributeName: "roomCode", AttributeType: "S" },
-  ],
+  KeySchema: [{ AttributeName: "roomCode", KeyType: "HASH" }],
+  AttributeDefinitions: [{ AttributeName: "roomCode", AttributeType: "S" }],
   ProvisionedThroughput: {
     ReadCapacityUnits: 10,
     WriteCapacityUnits: 10
@@ -37,12 +32,18 @@ export const initializeDynamoDB = async () => {
 }
 
 const createTable = async () => {
-  return dynamoDB.createTable(tableParams).promise()
+  return dynamoDB
+    .createTable(TABLE_PARAMS)
+    .promise()
     .then((data) => {
-      console.log(`created table, table description: ${JSON.stringify(data, null, 2)}`)
+      console.log(
+        `created table, table description: ${JSON.stringify(data, null, 2)}`
+      )
     })
     .catch((err) => {
-      console.error(`unable to create table, error: ${JSON.stringify(err, null, 2)}`)
+      console.error(
+        `unable to create table, error: ${JSON.stringify(err, null, 2)}`
+      )
     })
 }
 
@@ -52,7 +53,9 @@ export type RoomDocument = {
   language: CodeLanguage
 }
 
-export const getOrCreateDocument = async (roomCode: string): Promise<RoomDocument> => {
+export const getOrCreateDocument = async (
+  roomCode: string
+): Promise<RoomDocument> => {
   const result = await getDocument(roomCode)
   if (result.Item) {
     return result.Item as RoomDocument
