@@ -1,9 +1,11 @@
 import * as redis from "redis"
 
 export function newRedisClient() {
-  const REDIS_SERVER = process.env.REDIS_URL
   const redisClient = redis.createClient({
-    url: REDIS_SERVER
+    socket: {
+      host: process.env.REDIS_HOST,
+      tls: process.env.NODE_ENV === "PRODUCTION"
+    }
   })
 
   return redisClient
