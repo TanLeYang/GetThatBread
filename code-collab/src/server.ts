@@ -24,6 +24,11 @@ const redisClient = newRedisClient()
 
 // Set up socketio
 const app = express()
+
+app.get("/healthcheck", (req, res) => {
+  res.status(200).send("OK")
+})
+
 const server = http.createServer(app)
 const io = initializeSocketServer(server)
 const IO_PORT = process.env.PORT || 5001

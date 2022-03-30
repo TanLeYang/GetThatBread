@@ -4,6 +4,11 @@ import { createServer } from "http"
 import { Server } from "socket.io"
 
 const app = express()
+
+app.get("/healthcheck", (req, res) => {
+  res.status(200).send("OK")
+})
+
 const server = createServer(app)
 const io = new Server(server, {
   cors: {

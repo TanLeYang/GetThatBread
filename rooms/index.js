@@ -10,8 +10,8 @@ app.use(cors())
 
 app.use(express.json())
 
-app.get("/", (req, res) => {
-  res.send("HI")
+app.get("/healthcheck", (req, res) => {
+  res.status(200).send("OK")
 })
 
 app.get("/room/:roomCode", async (req, res) => {
