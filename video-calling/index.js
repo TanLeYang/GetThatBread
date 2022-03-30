@@ -13,6 +13,7 @@ const server = createServer(app)
 const io = new Server(server, {
   cors: {
     origin: "*",
+    credentials: true,
     methods: ["GET", "POST"]
   }
 })
