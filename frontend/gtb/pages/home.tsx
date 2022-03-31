@@ -4,10 +4,14 @@ import Header from "../components/Header"
 import CreateRoomCard from "../components/CreateRoomCard"
 import JoinRoomCard from "../components/JoinRoomCard"
 import { checkAuth, UNAUTHORISED_REDIRECT } from "../services/auth"
+import Head from "next/head"
 
 const Home: NextPage = () => {
   return (
     <Container>
+      <Head>
+        <title> Welcome! </title>
+      </Head>
       <Header />
       <div className="container flex flex-col lg:flex-row lg:mb-20 items-center justify-center gap-12 h-full">
         <CreateRoomCard />

@@ -8,6 +8,7 @@ import { PeerState, useVideoSocket } from "../../hooks/VideoSocket"
 import { useCodingSocket } from "../../hooks/CodingSocket"
 import { checkRoomExists } from "../../services/room"
 import { checkAuth, UNAUTHORISED_REDIRECT } from "../../services/auth"
+import Head from "next/head"
 const CodeEditor = dynamic(import("../../components/CodeEditor"), {
   ssr: false
 })
@@ -49,6 +50,9 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
 
   return (
     <div className="bg-gray-700 h-screen w-screen flex flex-col">
+      <Head>
+        <title> Start coding! </title>
+      </Head>
       <h3 className="text-white lg:text-left m-5"> Room Code: {roomCode} </h3>
       <div className="flex h-4/5">
         <CodeEditor value={code} onChange={onCodeChange} />

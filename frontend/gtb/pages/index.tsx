@@ -3,10 +3,14 @@ import HeroSection from "../components/Hero"
 import Container from "../components/Container"
 import Header from "../components/Header"
 import { checkAuth } from "../services/auth"
+import Head from "next/head"
 
 const Landing: NextPage = () => {
   return (
     <Container>
+      <Head>
+        <title> GetThatBread </title>
+      </Head>
       <Header />
       <section className="relative">
         <HeroSection />
