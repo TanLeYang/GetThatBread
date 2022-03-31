@@ -1,14 +1,8 @@
 import { GetServerSideProps, NextPage } from "next"
 import dynamic from "next/dynamic"
 import { useEffect, useRef } from "react"
-import {
-  CodeModifiedMessage,
-  CodeExecutionMessage
-} from "../../constants/types/coding"
-import {
-  executeCodeEvent,
-  informCodeModifiedEvent
-} from "../../constants/socketEvents"
+import { CodeModifiedMessage, CodeExecutionMessage } from "../../constants/types/coding"
+import { executeCodeEvent, informCodeModifiedEvent } from "../../constants/socketEvents"
 import Spinner from "../../components/Spinner"
 import { PeerState, useVideoSocket } from "../../hooks/VideoSocket"
 import { useCodingSocket } from "../../hooks/CodingSocket"
@@ -23,15 +17,8 @@ interface RoomProps {
 }
 
 const Room: NextPage<RoomProps> = ({ roomCode }) => {
-  const {
-    code,
-    codeToSubmit,
-    setCodeToSubmit,
-    output,
-    isLoadingOutput,
-    setIsLoadingOutput,
-    codingSocketRef
-  } = useCodingSocket(roomCode)
+  const { code, setCode, output, isLoadingOutput, setIsLoadingOutput, codingSocketRef } =
+    useCodingSocket(roomCode)
   const { myVideo, peers } = useVideoSocket(roomCode)
 
   const onCodeChange = (newCode: string) => {
@@ -43,7 +30,7 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
       }
     }
 
-    setCodeToSubmit(newCode)
+    setCode(newCode)
     codingSocketRef.current?.emit(informCodeModifiedEvent, codeModifiedMessage)
   }
 
@@ -52,7 +39,7 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
     const codeState: CodeExecutionMessage = {
       roomCode,
       codeState: {
-        code: codeToSubmit,
+        code: code,
         language: "PYTHON"
       }
     }
@@ -67,13 +54,7 @@ const Room: NextPage<RoomProps> = ({ roomCode }) => {
         <CodeEditor value={code} onChange={onCodeChange} />
 
         <div>
-          <video
-            className="h-60 w-60"
-            muted
-            autoPlay
-            playsInline
-            ref={myVideo}
-          />
+          <video className="h-60 w-60" muted autoPlay playsInline ref={myVideo} />
           {peers.map((peer, idx) => {
             return <PeerVideo key={idx} peer={peer} />
           })}

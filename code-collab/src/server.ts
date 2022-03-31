@@ -64,10 +64,8 @@ io.on("connection", (socket: SocketType) => {
   })
 })
 
-Promise.all([initializeRedisClient(redisClient), initializeDynamoDB()]).then(
-  () => {
-    server.listen(IO_PORT, () => {
-      console.log(`server listening on port ${IO_PORT}`)
-    })
-  }
-)
+Promise.all([initializeRedisClient(redisClient), initializeDynamoDB()]).then(() => {
+  server.listen(IO_PORT, () => {
+    console.log(`server listening on port ${IO_PORT}`)
+  })
+})

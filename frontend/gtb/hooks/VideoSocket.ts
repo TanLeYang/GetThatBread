@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import io, { Socket } from "socket.io-client"
+import { Socket } from "socket.io-client"
 import Peer from "simple-peer"
 import {
   allVideoUsersEvent,
@@ -10,6 +10,7 @@ import {
   receiveReturningVideoSignalEvent,
   userVideoLeftEvent
 } from "../constants/socketEvents"
+import { getSocketIOClient } from "../services/socket"
 
 export type PeerState = {
   peerId: string
@@ -26,60 +27,48 @@ export function useVideoSocket(roomCode: string) {
   const [peers, setPeers] = useState<PeerState[]>([])
 
   useEffect(() => {
-    const serverUrl =
-      process.env.NEXT_PUBLIC_VIDEO_SERVER_URL || "ws://localhost:5002"
-    const socket = io(serverUrl)
+    const socket = getSocketIOClient("VIDEO")
 
     socketRef.current = socket
 
-    navigator.mediaDevices
-      .getUserMedia({ video: true, audio: true })
-      .then((currentStream) => {
-        if (myVideo.current) {
-          myVideo.current.srcObject = currentStream
-        }
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((currentStream) => {
+      if (myVideo.current) {
+        myVideo.current.srcObject = currentStream
+      }
 
-        socket.emit(joinVideoRoomEvent, roomCode)
-        socket.on(allVideoUsersEvent, (users: string[]) => {
-          const peers = users.map((user) => {
-            const peer = createPeerFromExistingUser(
-              socket.id,
-              user,
-              currentStream
-            )
-            peersRef.current.push(peer)
-            return peer
-          })
-
-          setPeers(peers)
-        })
-
-        socket.on(userVideoJoinedEvent, ({ signal, callerId }) => {
-          const peer = addPeerFromIncomingUser(signal, callerId, currentStream)
-
+      socket.emit(joinVideoRoomEvent, roomCode)
+      socket.on(allVideoUsersEvent, (users: string[]) => {
+        const peers = users.map((user) => {
+          const peer = createPeerFromExistingUser(socket.id, user, currentStream)
           peersRef.current.push(peer)
-
-          setPeers((peers) => [...peers, peer])
+          return peer
         })
 
-        socket.on(receiveReturningVideoSignalEvent, ({ from, signal }) => {
-          const peer = peersRef.current.find((p) => p.peerId === from)
-          peer?.instance.signal(signal)
-        })
-
-        socket.on(userVideoLeftEvent, (userId) => {
-          peersRef.current = peersRef.current.filter((p) => p.peerId !== userId)
-          setPeers(peersRef.current)
-        })
+        setPeers(peers)
       })
+
+      socket.on(userVideoJoinedEvent, ({ signal, callerId }) => {
+        const peer = addPeerFromIncomingUser(signal, callerId, currentStream)
+
+        peersRef.current.push(peer)
+
+        setPeers((peers) => [...peers, peer])
+      })
+
+      socket.on(receiveReturningVideoSignalEvent, ({ from, signal }) => {
+        const peer = peersRef.current.find((p) => p.peerId === from)
+        peer?.instance.signal(signal)
+      })
+
+      socket.on(userVideoLeftEvent, (userId) => {
+        peersRef.current = peersRef.current.filter((p) => p.peerId !== userId)
+        setPeers(peersRef.current)
+      })
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const createPeerFromExistingUser = (
-    from: string,
-    to: string,
-    stream: MediaStream
-  ) => {
+  const createPeerFromExistingUser = (from: string, to: string, stream: MediaStream) => {
     const peer = new Peer({
       initiator: true,
       trickle: false,
@@ -100,11 +89,7 @@ export function useVideoSocket(roomCode: string) {
     }
   }
 
-  const addPeerFromIncomingUser = (
-    signal: any,
-    callerId: string,
-    stream: MediaStream
-  ) => {
+  const addPeerFromIncomingUser = (signal: any, callerId: string, stream: MediaStream) => {
     const peer = new Peer({
       initiator: false,
       trickle: false,

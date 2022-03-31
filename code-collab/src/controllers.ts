@@ -1,16 +1,7 @@
 import { CodeChangeEventArgs, CodeService, CodeState } from "./coding"
-import {
-  addOrUpdateDocument,
-  getOrCreateDocument,
-  RoomDocument
-} from "./dynamo"
+import { addOrUpdateDocument, getOrCreateDocument, RoomDocument } from "./dynamo"
 import AWSLambda from "./lambda"
-import {
-  CodeExecutionMessage,
-  CodeModifiedMessage,
-  SaveCodeMessage,
-  SocketType
-} from "./socket"
+import { CodeExecutionMessage, CodeModifiedMessage, SaveCodeMessage, SocketType } from "./socket"
 
 export function createJoinRoomController(codeService: CodeService) {
   return async (ws: SocketType, msg: string) => {
@@ -43,14 +34,13 @@ export function createJoinRoomController(codeService: CodeService) {
       }
     )
 
-    const codeExecutionResultSubscription =
-      codeService.subscribeCodeExecuionResultEvent(
-        ws.id,
-        roomCode,
-        (output: string) => {
-          ws.emit("codeExecutionResult", output)
-        }
-      )
+    const codeExecutionResultSubscription = codeService.subscribeCodeExecuionResultEvent(
+      ws.id,
+      roomCode,
+      (output: string) => {
+        ws.emit("codeExecutionResult", output)
+      }
+    )
 
     return await Promise.all([
       codeChangeSubscription,
