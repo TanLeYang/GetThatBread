@@ -22,7 +22,6 @@ const UNAUTHORISED_REDIRECT = {
 const checkAuth = async (context: GetServerSidePropsContext): Promise<AuthResult> => {
   try {
     const { Auth } = withSSRContext(context)
-    console.log("HELLO", amplifyConfig.aws_cognito_region)
     Auth.configure({ ...amplifyConfig, ssr: true })
     const user = await getUser(Auth)
     return {
