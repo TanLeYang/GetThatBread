@@ -20,6 +20,10 @@ const Landing: NextPage = () => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  if (process.env.NEXT_PUBLIC_IS_OFFLINE) {
+    return { props: {} }
+  }
+
   const authResult = await checkAuth(context)
   if (authResult.isAuthenticated) {
     return {

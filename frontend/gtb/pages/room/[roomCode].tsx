@@ -105,6 +105,10 @@ const PeerVideo: React.FunctionComponent<PeerVideoProps> = ({ peer }) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  if (process.env.NEXT_PUBLIC_IS_OFFLINE) {
+    return UNAUTHORISED_REDIRECT
+  }
+
   const authResult = await checkAuth(context)
   if (!authResult.isAuthenticated) {
     return UNAUTHORISED_REDIRECT
