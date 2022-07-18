@@ -12,3 +12,7 @@ It has everything you need to simulate a full interview experience:
 - execute your code to verify the correctness of your solution
 
 Check out the video demo [here](https://youtu.be/2Yz3tOgO2xQ)!
+
+## Architecture
+Extremely overengineered to try out more AWS services (and meet assignment reqs)
+![Architecture diagram](/docs/architecture.png)
